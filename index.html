@@ -92,13 +92,12 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# system initialized with key.</p>
+      <p class="text-emerald-700">> root@nikya:~# system initialized.</p>
     </div>
   </footer>
 
   <script>
-    // --- PERMANENT HARDCODED API KEY ---
-    const HARDCODED_API_KEY = "AQ.Ab8RN6LuTuqNdfaFsN2jg30iYUNV6Zj5DFmdp1UZXxET4T-rqQ";
+    const HARDCODED_API_KEY = "";
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
@@ -127,7 +126,7 @@
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus(true);
-        log('> [SYSTEM]: Core online. Hardcoded key active.', 'text-emerald-400');
+        log('> [SYSTEM]: Core online.', 'text-emerald-400');
       } else {
         updateStatus(false);
         log('> [!] API key required. Enter key above and tap [EXEC].', 'text-yellow-400');
@@ -139,12 +138,12 @@
       if (key) {
         localStorage.setItem('GEMINI_API_KEY', key);
         updateStatus(true);
-        log('> [OK]: Key saved to local storage.', 'text-emerald-300');
-        speak("Key updated. Nikya online.");
+        log('> [OK]: Key saved securely in browser storage.', 'text-emerald-300');
+        speak("Key saved. Nikya online.");
       } else {
         localStorage.removeItem('GEMINI_API_KEY');
         updateStatus(getApiKey() !== null);
-        log('> [WARN]: Local key cleared. Falling back to hardcoded key.', 'text-yellow-400');
+        log('> [WARN]: Key cleared.', 'text-yellow-400');
       }
     });
 
@@ -166,7 +165,7 @@
       terminalLog.scrollTop = terminalLog.scrollHeight;
     }
 
-    // --- NORMAL VOICE SYNTHESIS ENGINE ---
+    // --- VOICE SYNTHESIS ENGINE ---
     function speak(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -194,7 +193,7 @@
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // --- NATIVE HARDWARE CONTROLS ---
+    // --- HARDWARE CONTROLS ---
     async function toggleFlashlight(turnOn) {
       try {
         if (turnOn) {
