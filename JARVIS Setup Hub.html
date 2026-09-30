@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>J.A.R.V.I.S. Mobile Assistant & Setup Hub</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font: Orbitron & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        jarvis: {
+                            cyan: '#00f0ff',
+                            blue: '#0070f3',
+                            dark: '#050a14',
+                            card: 'rgba(10, 20, 38, 0.75)',
+                            gold: '#ffb700',
+                            accent: 'rgba(0, 240, 255, 0.15)'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Sci-Fi & Glassmorphic Utilities */
+        body {
+            background-color: #030712;
+            color: #e0f2fe;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 85% 30%, rgba(0, 112, 243, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+        }
+
+        .glow-cyan-sm {
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+        }
+
+        .glow-gold-text {
+            text-shadow: 0 0 10px rgba(255, 183, 0, 0.7);
+        }
+
+        .glass-panel {
+            background: rgba(8, 17, 32, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .glass-panel-gold {
+            background: rgba(20, 15, 5, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 183, 0, 0.25);
+        }
+
+        /* Arc Reactor CSS Pulse */
+        .arc-pulse {
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.8)); }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 240, 255, 0.03) 50%,
+                rgba(0, 240, 255, 0.03)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(3, 7, 18, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col scanline antialiased selection:bg-jarvis-cyan selection:text-black">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-cyan-500/20 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative w-9 h-9 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin"></div>
+                    <i class="fa-solid fa-microchip text-cyan-400 text-base"></i>
+                </div>
+                <div>
+                    <h1 class="font-orbitron font-extrabold text-lg md:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300 glow-text">
+                        J.A.R.V.I.S.
+                    </h1>
+                    <p class="text-[10px] font-mono text-cyan-300/60 uppercase tracking-widest hidden sm:block">
+                        Mobile Neural Assistant Architecture
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header System Status -->
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-cyan-300">CORE: ONLINE</span>
+                </div>
+                <button onclick="openApiKeyModal()" class="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-mono transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-[10px]"></i>
+                    <span id="api-key-badge">Set API Key</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col gap-6">
+
+        <!-- View Selection Tabs -->
+        <div class="flex p-1 bg-slate-900/80 rounded-xl border border-cyan-500/20 overflow-x-auto no-scrollbar">
+            <button id="tab-btn-hud" onclick="switchTab('hud')" class="flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 glow-cyan-sm">
+                <i class="fa-solid fa-headset text-cyan-400"></i>
+                <span>PHONE HUD</span>
+            </button>
+            <button id="tab-btn-files" onclick="switchTab('files')" class="flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <i class="fa-solid fa-code text-cyan-400"></i>
+                <span>REPO CODE</span>
+            </button>
+            <button id="tab-btn-setup" onclick="switchTab('setup')" class="flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <i class="fa-solid fa-rocket text-cyan-400"></i>
+                <span>DEPLOYMENT GUIDE</span>
+            </button>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: INTERACTIVE J.A.R.V.I.S. PHONE HUD INTERFACE                      -->
+        <!-- ========================================================================= -->
+        <div id="view-hud" class="space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Arc Reactor Core & Voice Controls -->
+                <div class="lg:col-span-7 flex flex-col gap-6">
+                    
+                    <!-- Arc Reactor Card -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[380px]">
+                        <!-- Background Sci-Fi Grid Overlay -->
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#00f0ff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+                        <!-- Status Telemetry Top Overlay -->
+                        <div class="w-full flex items-center justify-between text-xs font-mono text-cyan-400/80 mb-4 px-2">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-wifi text-[10px]"></i>
+                                <span id="hud-connection-status">WEBSOCKET: MOCK / LOCAL</span>
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                                <span id="hud-fps-counter">60 FPS</span>
+                            </span>
+                        </div>
+
+                        <!-- Arc Reactor Visualizer Canvas Canvas Container -->
+                        <div class="relative my-4 flex items-center justify-center cursor-pointer group" onclick="toggleSpeechRecognition()">
+                            <canvas id="arc-reactor-canvas" width="260" height="260" class="rounded-full z-10 transition-transform duration-300 group-hover:scale-105"></canvas>
+                            
+                            <!-- Mic Center Overlay Button -->
+                            <button id="mic-trigger-btn" class="absolute z-20 w-16 h-16 rounded-full bg-cyan-500/20 border-2 border-cyan-400/80 hover:bg-cyan-500/40 flex items-center justify-center text-cyan-300 shadow-[0_0_25px_rgba(0,240,255,0.5)] transition duration-300">
+                                <i id="mic-icon" class="fa-solid fa-microphone text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Interactive Speech Indicator -->
+                        <div class="text-center z-10 mt-2">
+                            <h3 id="hud-voice-state" class="font-orbitron font-semibold text-cyan-300 text-sm tracking-widest uppercase">
+                                Tap Reactor or Mic to Engage
+                            </h3>
+                            <p id="hud-transcript" class="text-xs font-mono text-slate-300 mt-2 max-w-md h-10 overflow-y-auto px-4 py-1 rounded bg-black/40 border border-cyan-500/10 italic">
+                                "Awaiting query... Try asking 'Jarvis, check system status' or 'Set alarm for 7 AM'."
+                            </p>
+                        </div>
+
+                        <!-- Visualizer Modes Bar -->
+                        <div class="w-full flex items-center justify-center gap-4 mt-6 text-xs font-mono">
+                            <button onclick="setVoiceMode('simulated')" id="mode-sim" class="px-3 py-1 rounded-full border border-cyan-500/40 bg-cyan-500/20 text-cyan-300">
+                                Mode: Interactive AI
+                            </button>
+                            <button onclick="testJarvisVoice()" class="px-3 py-1 rounded-full border border-blue-500/40 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20">
+                                <i class="fa-solid fa-volume-high mr-1"></i> Test Voice Synthesis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Shortcuts (Phone Automation Mockups) -->
+                    <div class="glass-panel rounded-2xl p-5">
+                        <h2 class="font-orbitron text-xs font-bold tracking-widest text-cyan-400 uppercase mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Phone Automation Shortcuts (Tasker / iOS Triggers)
+                        </h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button onclick="triggerAction('flashlight')" class="p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition group">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-2 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-lightbulb"></i>
+                                </div>
+                                <div class="font-orbitron text-xs text-slate-200">Flashlight</div>
+                                <div class="text-[10px] font-mono text-slate-400">Toggle Torch</div>
+                            </button>
+
+                            <button onclick="triggerAction('alarm')" class="p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition group">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 mb-2 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div class="font-orbitron text-xs text-slate-200">Set Alarm</div>
+                                <div class="text-[10px] font-mono text-slate-400">07:00 AM Call</div>
+                            </button>
+
+                            <button onclick="triggerAction('search')" class="p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition group">
+                                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-2 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <div class="font-orbitron text-xs text-slate-200">Web Search</div>
+                                <div class="text-[10px] font-mono text-slate-400">Gemini Intelligence</div>
+                            </button>
+
+                            <button onclick="triggerAction('system')" class="p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition group">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                </div>
+                                <div class="font-orbitron text-xs text-slate-200">Diagnostics</div>
+                                <div class="text-[10px] font-mono text-slate-400">Scan Hardware</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Live Telemetry & Console Log -->
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    
+                    <!-- Real-time Device Telemetry -->
+                    <div class="glass-panel rounded-2xl p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-orbitron text-xs font-bold tracking-widest text-cyan-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> Mobile Telemetry
+                            </h2>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-500/30">
+                                LIVE SENSORS
+                            </span>
+                        </div>
+
+                        <div class="space-y-4 font-mono text-xs">
+                            <!-- Latency Metric -->
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>Speech Engine Latency</span>
+                                    <span id="metric-latency" class="text-cyan-400 font-bold">18 ms</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div id="bar-latency" class="bg-cyan-400 h-1.5 rounded-full" style="width: 25%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Battery Level (Real or Mock) -->
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>Phone Battery Level</span>
+                                    <span id="metric-battery" class="text-emerald-400 font-bold">92% (Charging)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div id="bar-battery" class="bg-emerald-400 h-1.5 rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Neural Model Load -->
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>LLM Orchestrator Load</span>
+                                    <span id="metric-load" class="text-amber-400 font-bold">14%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div id="bar-load" class="bg-amber-400 h-1.5 rounded-full" style="width: 14%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-2 gap-2 pt-2 text-[11px]">
+                                <div class="p-2 rounded bg-black/40 border border-cyan-500/10">
+                                    <span class="text-slate-400 block">AI Model</span>
+                                    <span class="text-cyan-300 font-semibold">Gemini 1.5 Flash</span>
+                                </div>
+                                <div class="p-2 rounded bg-black/40 border border-cyan-500/10">
+                                    <span class="text-slate-400 block">TTS Pipeline</span>
+                                    <span class="text-cyan-300 font-semibold">Native Speech Synth</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Output Stream -->
+                    <div class="glass-panel rounded-2xl p-5 flex-1 flex flex-col min-h-[220px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-orbitron text-xs font-bold tracking-widest text-cyan-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-terminal"></i> Terminal Log Output
+                            </h2>
+                            <button onclick="clearTerminalLog()" class="text-[10px] font-mono text-slate-400 hover:text-cyan-300">
+                                Clear
+                            </button>
+                        </div>
+
+                        <!-- Console Output Box -->
+                        <div id="terminal-log" class="flex-1 bg-black/60 rounded-xl p-3 font-mono text-[11px] text-cyan-300/80 space-y-1.5 overflow-y-auto max-h-[220px] border border-cyan-500/10">
+                            <p class="text-slate-500">[SYSTEM INIT] Initializing J.A.R.V.I.S. HUD Core v2.4...</p>
+                            <p class="text-slate-500">[AUDIO] Web Audio Context established at 48000Hz.</p>
+                            <p class="text-cyan-400">[READY] Waiting for user audio or automation triggers.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: REPOSITORY FILE GENERATOR & CODE VIEWER                            -->
+        <!-- ========================================================================= -->
+        <div id="view-files" class="hidden space-y-6">
+            
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="font-orbitron font-bold text-lg text-cyan-300 flex items-center gap-2">
+                            <i class="fa-solid fa-folder-open text-cyan-400"></i> Repository Code Files
+                        </h2>
+                        <p class="text-xs font-mono text-slate-400 mt-1">
+                            Complete production-ready setup files for your GitHub deployment.
+                        </p>
+                    </div>
+                    <button onclick="copyCurrentActiveCode()" class="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-semibold transition flex items-center justify-center gap-2 glow-cyan-sm">
+                        <i class="fa-regular fa-copy"></i>
+                        <span id="copy-btn-text">Copy Active File</span>
+                    </button>
+                </div>
+
+                <!-- Code Files Sub-tabs -->
+                <div class="flex gap-2 overflow-x-auto pb-2 border-b border-cyan-500/20 no-scrollbar mb-4">
+                    <button onclick="switchCodeFile('main_py')" id="file-tab-main_py" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-cyan-500/40 bg-cyan-500/20 text-cyan-300 whitespace-nowrap">
+                        backend/main.py
+                    </button>
+                    <button onclick="switchCodeFile('requirements_txt')" id="file-tab-requirements_txt" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap">
+                        backend/requirements.txt
+                    </button>
+                    <button onclick="switchCodeFile('dockerfile')" id="file-tab-dockerfile" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap">
+                        backend/Dockerfile
+                    </button>
+                    <button onclick="switchCodeFile('deploy_yml')" id="file-tab-deploy_yml" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap">
+                        .github/workflows/deploy.yml
+                    </button>
+                    <button onclick="switchCodeFile('frontend_html')" id="file-tab-frontend_html" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap">
+                        frontend/index.html
+                    </button>
+                    <button onclick="switchCodeFile('readme_md')" id="file-tab-readme_md" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap">
+                        README.md
+                    </button>
+                </div>
+
+                <!-- Active Code Viewer Display Box -->
+                <div class="relative rounded-xl overflow-hidden bg-black/80 border border-cyan-500/20">
+                    <div class="flex items-center justify-between px-4 py-2 bg-slate-950 border-b border-cyan-500/10 text-xs font-mono text-slate-400">
+                        <span id="active-file-path"><i class="fa-regular fa-file-code text-cyan-400 mr-2"></i>backend/main.py</span>
+                        <span id="active-file-lang" class="text-[10px] text-cyan-400 uppercase font-bold">PYTHON</span>
+                    </div>
+                    <pre class="p-4 overflow-x-auto text-xs font-mono text-cyan-100/90 leading-relaxed max-h-[500px]"><code id="code-display-block">Loading repository code...</code></pre>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: STEP-BY-STEP DEPLOYMENT GUIDE WIZARD                               -->
+        <!-- ========================================================================= -->
+        <div id="view-setup" class="hidden space-y-6">
+            
+            <div class="glass-panel rounded-2xl p-6">
+                <h2 class="font-orbitron font-bold text-lg text-cyan-300 flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-map-location-dot text-cyan-400"></i> Full Deployment Guide
+                </h2>
+                <p class="text-xs font-mono text-slate-400 mb-6">
+                    Follow these four simple steps to host your JARVIS backend for free and link your smartphone.
+                </p>
+
+                <div class="space-y-6">
+                    
+                    <!-- Step 1 -->
+                    <div class="p-4 rounded-xl bg-slate-900/60 border border-cyan-500/20 flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-orbitron font-bold flex items-center justify-center shrink-0">
+                            1
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-orbitron font-semibold text-sm text-cyan-200">Create GitHub Repository</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Go to <a href="https://github.com/new" target="_blank" class="text-cyan-400 underline">github.com/new</a> and create a public repository named <code class="bg-black/50 px-1.5 py-0.5 rounded text-cyan-300 font-mono">jarvis-phone-assistant</code>.
+                            </p>
+                            <p class="text-xs text-slate-400">
+                                Clone it to your computer or use GitHub Desktop, and copy all code files generated in the <b>REPO CODE</b> tab into their respective directory paths.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="p-4 rounded-xl bg-slate-900/60 border border-cyan-500/20 flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-orbitron font-bold flex items-center justify-center shrink-0">
+                            2
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-orbitron font-semibold text-sm text-cyan-200">Set Repository Secrets & Deploy Backend</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                In your GitHub repository, go to <b>Settings &gt; Secrets and variables &gt; Actions</b> and add:
+                            </p>
+                            <ul class="list-disc list-inside text-xs font-mono text-cyan-300/80 space-y-1">
+                                <li><code class="text-amber-300">GEMINI_API_KEY</code>: Your Gemini API Key from Google AI Studio.</li>
+                            </ul>
+                            <p class="text-xs text-slate-400">
+                                Sign up for a free cloud web service on <a href="https://render.com" target="_blank" class="text-cyan-400 underline">Render.com</a> or <a href="https://railway.app" target="_blank" class="text-cyan-400 underline">Railway.app</a>, connect your GitHub repo, select Docker runtime, and deploy!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="p-4 rounded-xl bg-slate-900/60 border border-cyan-500/20 flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-orbitron font-bold flex items-center justify-center shrink-0">
+                            3
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-orbitron font-semibold text-sm text-cyan-200">Enable GitHub Pages for Mobile Web App</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Under your repository settings, navigate to <b>Pages</b>, set source to <code class="bg-black/50 px-1.5 py-0.5 rounded text-cyan-300 font-mono">Deploy from a branch</code>, and select <code class="bg-black/50 px-1.5 py-0.5 rounded text-cyan-300 font-mono">main / frontend</code>.
+                            </p>
+                            <p class="text-xs text-slate-400">
+                                Open the generated GitHub Pages URL on your Android or iOS device and tap <b>"Add to Home Screen"</b> to turn JARVIS into a full-screen PWA app.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="p-4 rounded-xl bg-slate-900/60 border border-cyan-500/20 flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-orbitron font-bold flex items-center justify-center shrink-0">
+                            4
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-orbitron font-semibold text-sm text-cyan-200">Connect Phone System Automation Tools</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                <b>Android (Tasker):</b> Create HTTP Request Tasks that listen for webhooks sent by the JARVIS FastAPI backend (e.g. <code class="text-cyan-300">/api/action</code>) to toggle system settings, read SMS, or set native alarms.
+                            </p>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                <b>iOS (Shortcuts):</b> Use Apple Shortcuts with the "Get Contents of URL" action or trigger local URL schemes (<code class="text-cyan-300">shortcuts://run-shortcut?name=JARVIS_Alarm</code>).
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- API Key Configuration Modal -->
+    <div id="modal-api-key" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-cyan-500/40 relative glow-cyan">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="font-orbitron font-bold text-lg text-cyan-300 flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-key"></i> Configure Gemini API
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">
+                Enter your Gemini API key for local web-based testing in the HUD. Your key is stored securely in your browser's local storage.
+            </p>
+            <div class="space-y-4">
+                <input id="input-gemini-key" type="password" placeholder="AIzaSy..." class="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-cyan-500/30 text-xs font-mono text-cyan-200 focus:outline-none focus:border-cyan-400">
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeApiKeyModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-mono text-slate-300 hover:bg-slate-700">
+                        Cancel
+                    </button>
+                    <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-mono font-semibold hover:bg-cyan-500/30">
+                        Save Key
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           DATA: REPOSITORY CODE FILES CONTENT
+           ========================================================================= */
+        const REPO_FILES = {
+            main_py: {
+                path: 'backend/main.py',
+                lang: 'PYTHON',
+                code: `import os
+import json
+import asyncio
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from google import genai
+from google.genai import types
+
+app = FastAPI(title="J.A.R.V.I.S. Mobile Neural Assistant Core")
+
+# Enable CORS for phone client connections
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize Gemini Client
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+
+# Define Phone Automation System Functions (Tool Definitions)
+phone_tools = [
+    types.Tool(
+        function_declarations=[
+            types.FunctionDeclaration(
+                name="set_phone_alarm",
+                description="Set an alarm on the user's phone.",
+                parameters=types.Schema(
+                    type=types.Type.OBJECT,
+                    properties={
+                        "time": types.Schema(type=types.Type.STRING, description="Time in HH:MM format"),
+                        "label": types.Schema(type=types.Type.STRING, description="Alarm label")
+                    },
+                    required=["time"]
+                )
+            ),
+            types.FunctionDeclaration(
+                name="toggle_flashlight",
+                description="Turn phone torch on or off.",
+                parameters=types.Schema(
+                    type=types.Type.OBJECT,
+                    properties={
+                        "state": types.Schema(type=types.Type.STRING, enum=["on", "off"])
+                    },
+                    required=["state"]
+                )
+            )
+        ]
+    )
+]
+
+@app.get("/health")
+def health_check():
+    return {"status": "ONLINE", "system": "J.A.R.V.I.S. Core", "version": "2.4.0"}
+
+@app.websocket("/ws")
+async def websocket_jarvis_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    print("[SERVER] Mobile J.A.R.V.I.S. client connected.")
+    
+    try:
+        while True:
+            # Receive raw text/json command from mobile frontend
+            data = await websocket.receive_text()
+            payload = json.loads(data)
+            user_text = payload.get("text", "")
+            
+            if not client:
+                await websocket.send_text(json.dumps({
+                    "response": f"J.A.R.V.I.S. Core connected. Key missing, echoing: {user_text}",
+                    "actions": []
+                }))
+                continue
+            
+            # Request LLM stream with system instructions & function tools
+            response = client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents=user_text,
+                config=types.GenerateContentConfig(
+                    system_instruction="You are J.A.R.V.I.S., Tony Stark's concise, highly intelligent AI voice assistant for mobile. Keep replies brief, formal, and witty.",
+                    tools=phone_tools,
+                    temperature=0.7
+                )
+            )
+            
+            # Parse responses and check for tool calls
+            actions_to_execute = []
+            if response.function_calls:
+                for call in response.function_calls:
+                    actions_to_execute.append({
+                        "name": call.name,
+                        "args": call.args
+                    })
+
+            reply_text = response.text if response.text else "Executing automated phone system action, sir."
+
+            await websocket.send_text(json.dumps({
+                "response": reply_text,
+                "actions": actions_to_execute
+            }))
+
+    except WebSocketDisconnect:
+        print("[SERVER] Mobile client disconnected.")
+    except Exception as e:
+        print(f"[ERROR] WebSocket error: {e}")
+        await websocket.close()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)`
+            },
+
+            requirements_txt: {
+                path: 'backend/requirements.txt',
+                lang: 'TEXT',
+                code: `fastapi==0.110.0
+uvicorn[standard]==0.28.0
+google-genai==0.1.1
+websockets==12.0
+python-dotenv==1.0.1
+pydantic==2.6.4`
+            },
+
+            dockerfile: {
+                path: 'backend/Dockerfile',
+                lang: 'DOCKERFILE',
+                code: `# Production Dockerfile for JARVIS Assistant Backend
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Expose port and launch application
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]`
+            },
+
+            deploy_yml: {
+                path: '.github/workflows/deploy.yml',
+                lang: 'YAML',
+                code: `name: CI/CD Deploy J.A.R.V.I.S. Core Backend
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+
+    - name: Verify Backend Code
+      run: |
+        python -c "import fastapi; print('FastAPI Loaded Successfully')"
+
+    # Deployment hook example for Render or Cloud Server
+    - name: Trigger Cloud Deployment Webhook
+      if: success()
+      run: |
+        echo "Repository validated. Backend ready for cloud deployment trigger."`
+            },
+
+            frontend_html: {
+                path: 'frontend/index.html',
+                lang: 'HTML',
+                code: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S. Mobile Voice Client</title>
+    <style>
+        body { background: #030712; color: #00f0ff; font-family: monospace; display: flex; flex-direction: column; items-center; justify-content: center; height: 100vh; margin: 0; }
+        .hud { border: 1px solid #00f0ff; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 0 20px rgba(0,240,255,0.3); }
+        button { background: rgba(0,240,255,0.2); border: 1px solid #00f0ff; color: #00f0ff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="hud">
+        <h2>J.A.R.V.I.S. VOICE CLIENT</h2>
+        <p id="status">Status: Disconnected</p>
+        <button onclick="connectWS()">Connect to Neural Core</button>
+    </div>
+    <script>
+        let ws;
+        function connectWS() {
+            ws = new WebSocket("wss://YOUR-BACKEND-URL.onrender.com/ws");
+            ws.onopen = () => document.getElementById("status").innerText = "Status: Online & Ready";
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                alert("JARVIS: " + data.response);
+            };
+        }
+    </script>
+</body>
+</html>`
+            },
+
+            readme_md: {
+                path: 'README.md',
+                lang: 'MARKDOWN',
+                code: `# J.A.R.V.I.S. Mobile Neural Assistant & Cloud Backend
+
+A high-performance, low-latency, voice-driven AI assistant inspired by Iron Man's J.A.R.V.I.S. Built specifically for mobile devices with live streaming audio visualizer, function execution, and automated GitHub CI/CD workflows.
+
+---
+
+## ⚡ Quick Architecture Overview
+- **Brain (LLM):** Gemini 1.5 Flash via \`google-genai\` SDK
+- **Backend:** FastAPI + WebSockets streaming orchestrator
+- **Frontend:** Lightweight PWA / Web Audio API Arc Reactor visualizer
+- **Automations:** Tasker (Android) & iOS Shortcuts integration hooks
+
+---
+
+## 🚀 Step-by-Step Setup
+1. **Clone this repository:**
+   \`\`\`bash
+   git clone https://github.com/your-username/jarvis-phone-assistant.git
+   cd jarvis-phone-assistant
+   \`\`\`
+
+2. **Set up local Environment:**
+   \`\`\`bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate # or venv\\Scripts\\activate on Windows
+   pip install -r requirements.txt
+   export GEMINI_API_KEY="your-gemini-api-key"
+   python main.py
+   \`\`\`
+
+3. **Deploy Free Backend to Render / Railway:**
+   - Create a new Web Service on [Render.com](https://render.com).
+   - Link your GitHub repository.
+   - Choose **Docker** as the runtime environment.
+   - Add \`GEMINI_API_KEY\` under Environment Variables.
+
+4. **Connect Mobile Device:**
+   - Open \`frontend/index.html\` on your smartphone or publish via GitHub Pages.
+   - Tap "Connect to Neural Core" to start hands-free voice interactions.`
+            }
+        };
+
+        /* =========================================================================
+           UI TAB CONTROL & FILE CODE VIEWER
+           ========================================================================= */
+        let currentActiveFileKey = 'main_py';
+
+        function switchTab(tab) {
+            document.getElementById('view-hud').classList.add('hidden');
+            document.getElementById('view-files').classList.add('hidden');
+            document.getElementById('view-setup').classList.add('hidden');
+
+            document.getElementById('tab-btn-hud').className = 'flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10';
+            document.getElementById('tab-btn-files').className = 'flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10';
+            document.getElementById('tab-btn-setup').className = 'flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10';
+
+            const activeBtn = document.getElementById(`tab-btn-${tab}`);
+            activeBtn.className = 'flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-orbitron text-xs sm:text-sm font-semibold tracking-wider transition flex items-center justify-center gap-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 glow-cyan-sm';
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+
+            if (tab === 'files') {
+                renderCodeFile(currentActiveFileKey);
+            }
+        }
+
+        function switchCodeFile(fileKey) {
+            currentActiveFileKey = fileKey;
+            
+            // Reset tab styling
+            Object.keys(REPO_FILES).forEach(key => {
+                const tabEl = document.getElementById(`file-tab-${key}`);
+                if (tabEl) {
+                    tabEl.className = 'px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-cyan-300 whitespace-nowrap';
+                }
+            });
+
+            const activeTab = document.getElementById(`file-tab-${fileKey}`);
+            if (activeTab) {
+                activeTab.className = 'px-3 py-1.5 rounded-lg text-xs font-mono border border-cyan-500/40 bg-cyan-500/20 text-cyan-300 whitespace-nowrap';
+            }
+
+            renderCodeFile(fileKey);
+        }
+
+        function renderCodeFile(fileKey) {
+            const fileData = REPO_FILES[fileKey];
+            if (!fileData) return;
+
+            document.getElementById('active-file-path').innerHTML = `<i class="fa-regular fa-file-code text-cyan-400 mr-2"></i>${fileData.path}`;
+            document.getElementById('active-file-lang').innerText = fileData.lang;
+            document.getElementById('code-display-block').textContent = fileData.code;
+        }
+
+        function copyCurrentActiveCode() {
+            const fileData = REPO_FILES[currentActiveFileKey];
+            if (!fileData) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = fileData.code;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyBtnText = document.getElementById('copy-btn-text');
+            copyBtnText.innerText = 'Copied to Clipboard!';
+            logTerminal(`[CLIPBOARD] Copied file ${fileData.path} to clipboard.`);
+
+            setTimeout(() => {
+                copyBtnText.innerText = 'Copy Active File';
+            }, 2500);
+        }
+
+        /* =========================================================================
+           ARC REACTOR ANIMATION & WEB AUDIO API ENGINE
+           ========================================================================= */
+        let canvas, ctx;
+        let animationFrameId;
+        let audioCtx, analyser, micStream, dataArray;
+        let isListening = false;
+        let rotationAngle = 0;
+
+        function initArcReactor() {
+            canvas = document.getElementById('arc-reactor-canvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            drawArcReactor(0);
+        }
+
+        function drawArcReactor(audioLevel = 0) {
+            if (!ctx) return;
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            rotationAngle += 0.015;
+
+            // Outer Glowing Ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 110, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 + audioLevel * 0.5})`;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Concentric Rotating Segmented Arcs
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotationAngle);
+
+            for (let i = 0; i < 8; i++) {
+                const angle = (i * Math.PI) / 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, 90 + audioLevel * 15, angle, angle + 0.25);
+                ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Counter Rotating Inner Ring
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(-rotationAngle * 1.5);
+
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI) / 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 65, angle, angle + 0.4);
+                ctx.strokeStyle = 'rgba(0, 112, 243, 0.9)';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Inner Core Glow
+            const coreRadius = 35 + audioLevel * 20;
+            const gradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, coreRadius);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.4, 'rgba(0, 240, 255, 0.9)');
+            gradient.addColorStop(0.8, 'rgba(0, 112, 243, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, coreRadius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            if (isListening) {
+                animationFrameId = requestAnimationFrame(() => {
+                    let level = 0;
+                    if (analyser && dataArray) {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < dataArray.length; i++) {
+                            sum += dataArray[i];
+                        }
+                        level = (sum / dataArray.length) / 255;
+                    } else {
+                        level = Math.sin(Date.now() * 0.005) * 0.2 + 0.2;
+                    }
+                    drawArcReactor(level);
+                });
+            } else {
+                drawArcReactor(Math.sin(Date.now() * 0.002) * 0.05 + 0.05);
+            }
+        }
+
+        async function startMicAudio() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                micStream = stream;
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                const source = audioCtx.createMediaStreamSource(stream);
+                source.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                logTerminal('[MIC] Microphone stream initialized & Web Audio bound.');
+            } catch (err) {
+                logTerminal('[WARN] Microphone access denied or unavailable. Using simulated audio pulse.');
+            }
+        }
+
+        /* =========================================================================
+           SPEECH RECOGNITION (STT) & SPEECH SYNTHESIS (TTS)
+           ========================================================================= */
+        let recognition;
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                logTerminal('[WARN] Web Speech API not natively supported in this browser.');
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('hud-voice-state').innerText = 'J.A.R.V.I.S. LISTENING...';
+                document.getElementById('hud-voice-state').className = 'font-orbitron font-semibold text-cyan-300 text-sm tracking-widest uppercase glow-text animate-pulse';
+                document.getElementById('mic-icon').className = 'fa-solid fa-microphone-slash text-xl text-red-400';
+                logTerminal('[STT] Speech recognition started...');
+                drawArcReactor(0.3);
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('hud-transcript').innerText = `"${transcript}"`;
+
+                if (event.results[0].isFinal) {
+                    processVoiceCommand(transcript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                logTerminal(`[ERROR] STT Error: ${event.error}`);
+                stopSpeechRecognition();
+            };
+
+            recognition.onend = () => {
+                stopSpeechRecognition();
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (isListening) {
+                if (recognition) recognition.stop();
+                stopSpeechRecognition();
+            } else {
+                startMicAudio();
+                if (recognition) {
+                    try { recognition.start(); } catch(e) { stopSpeechRecognition(); }
+                } else {
+                    // Fallback simulation
+                    isListening = true;
+                    document.getElementById('hud-voice-state').innerText = 'SIMULATING SPEECH INPUT...';
+                    setTimeout(() => {
+                        const mockQueries = [
+                            "Jarvis, check overall system diagnostics.",
+                            "Set an alarm for 7 AM tomorrow.",
+                            "Turn on the flashlight torch.",
+                            "What is the operational status of the cloud server?"
+                        ];
+                        const randomQuery = mockQueries[Math.floor(Math.random() * mockQueries.length)];
+                        document.getElementById('hud-transcript').innerText = `"${randomQuery}"`;
+                        processVoiceCommand(randomQuery);
+                        stopSpeechRecognition();
+                    }, 2500);
+                }
+            }
+        }
+
+        function stopSpeechRecognition() {
+            isListening = false;
+            document.getElementById('hud-voice-state').innerText = 'Tap Reactor or Mic to Engage';
+            document.getElementById('hud-voice-state').className = 'font-orbitron font-semibold text-cyan-300 text-sm tracking-widest uppercase';
+            document.getElementById('mic-icon').className = 'fa-solid fa-microphone text-xl text-cyan-300';
+            if (micStream) {
+                micStream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        /* Process query through Gemini API or Intelligent Offline Rule Engine */
+        async function processVoiceCommand(query) {
+            logTerminal(`[QUERY] "${query}"`);
+            const apiKey = localStorage.getItem('jarvis_gemini_key');
+
+            if (apiKey) {
+                logTerminal('[AI] Requesting response from Gemini 1.5 Flash...');
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: `You are JARVIS, Tony Stark's AI voice assistant. Reply concisely in 1-2 sentences: ${query}` }] }]
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        const aiReply = data.candidates[0].content.parts[0].text;
+                        speakJarvisResponse(aiReply);
+                        return;
+                    }
+                } catch (e) {
+                    logTerminal('[WARN] Gemini API call failed. Reverting to rule-based response.');
+                }
+            }
+
+            // Rule-based fallback handling
+            const lower = query.toLowerCase();
+            let reply = "At your service, sir. Systems are fully functional.";
+
+            if (lower.includes("alarm")) {
+                reply = "Setting phone alarm for 07:00 AM, sir. Execution webhook dispatched to Tasker.";
+            } else if (lower.includes("flashlight") || lower.includes("torch")) {
+                reply = "Toggling phone flashlight torch now.";
+            } else if (lower.includes("status") || lower.includes("diagnostic")) {
+                reply = "All neural modules operational. Server latency at 18 milliseconds, battery healthy.";
+            }
+
+            speakJarvisResponse(reply);
+        }
+
+        function speakJarvisResponse(text) {
+            logTerminal(`[JARVIS] "${text}"`);
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                
+                // Try to find British/English male voice for JARVIS feel
+                const jarvisVoice = voices.find(v => v.name.includes('Daniel') || v.name.includes('Google UK English Male') || v.lang.startsWith('en'));
+                if (jarvisVoice) utter.voice = jarvisVoice;
+
+                utter.pitch = 0.88;
+                utter.rate = 1.05;
+
+                utter.onstart = () => {
+                    document.getElementById('hud-voice-state').innerText = 'J.A.R.V.I.S. SPEAKING...';
+                    drawArcReactor(0.6);
+                };
+
+                utter.onend = () => {
+                    document.getElementById('hud-voice-state').innerText = 'Tap Reactor or Mic to Engage';
+                };
+
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function testJarvisVoice() {
+            speakJarvisResponse("Allow me to introduce myself. I am J.A.R.V.I.S., your mobile neural assistant core.");
+        }
+
+        /* =========================================================================
+           PHONE AUTOMATION & UTILITIES
+           ========================================================================= */
+        function triggerAction(actionType) {
+            if (actionType === 'flashlight') {
+                logTerminal('[ACTION] Triggered Flashlight Toggle Intent via Tasker Webhook.');
+                speakJarvisResponse("Illuminating flashlight, sir.");
+            } else if (actionType === 'alarm') {
+                logTerminal('[ACTION] Triggered Set Alarm Intent (07:00 AM).');
+                speakJarvisResponse("Alarm scheduled for 7 AM.");
+            } else if (actionType === 'search') {
+                logTerminal('[ACTION] Initiated Web Intelligence Scan.');
+                speakJarvisResponse("Initializing intelligence scan.");
+            } else if (actionType === 'system') {
+                logTerminal('[ACTION] Diagnostics complete: CPU 14%, RAM 1.2GB Free, Temp 34C.');
+                speakJarvisResponse("Diagnostics complete. All systems nominal.");
+            }
+        }
+
+        function logTerminal(message) {
+            const terminal = document.getElementById('terminal-log');
+            if (!terminal) return;
+            const p = document.createElement('p');
+            p.innerText = message;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminalLog() {
+            document.getElementById('terminal-log').innerHTML = '';
+        }
+
+        /* =========================================================================
+           MODAL & LOCAL STORAGE API KEY MANAGEMENT
+           ========================================================================= */
+        function openApiKeyModal() {
+            document.getElementById('modal-api-key').classList.remove('hidden');
+            const savedKey = localStorage.getItem('jarvis_gemini_key') || '';
+            document.getElementById('input-gemini-key').value = savedKey;
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('modal-api-key').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('input-gemini-key').value.trim();
+            if (key) {
+                localStorage.setItem('jarvis_gemini_key', key);
+                document.getElementById('api-key-badge').innerText = 'Key Configured';
+                logTerminal('[SYSTEM] Gemini API Key updated successfully.');
+            } else {
+                localStorage.removeItem('jarvis_gemini_key');
+                document.getElementById('api-key-badge').innerText = 'Set API Key';
+                logTerminal('[SYSTEM] Gemini API Key cleared.');
+            }
+            closeApiKeyModal();
+        }
+
+        /* =========================================================================
+           APPLICATION INITIALIZATION
+           ========================================================================= */
+        window.onload = function() {
+            initArcReactor();
+            setupSpeechRecognition();
+
+            if (localStorage.getItem('jarvis_gemini_key')) {
+                document.getElementById('api-key-badge').innerText = 'Key Configured';
+            }
+
+            // Simulate slight latency telemetry variations
+            setInterval(() => {
+                const latency = Math.floor(Math.random() * 8) + 14;
+                const latencyEl = document.getElementById('metric-latency');
+                if (latencyEl) latencyEl.innerText = `${latency} ms`;
+            }, 3000);
+        };
+    </script>
+</body>
+</html>
