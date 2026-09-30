@@ -92,11 +92,12 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# multilingual system initialized.</p>
+      <p class="text-emerald-700">> root@nikya:~# system online. ready for input.</p>
     </div>
   </footer>
 
   <script>
+    // Embed your API key inside the quotes if you want it hardcoded permanently:
     const HARDCODED_API_KEY = "";
 
     const apiKeyInput = document.getElementById('apiKeyInput');
@@ -138,12 +139,12 @@
       if (key) {
         localStorage.setItem('GEMINI_API_KEY', key);
         updateStatus(true);
-        log('> [OK]: API key loaded.', 'text-emerald-300');
-        speak("Key loaded. Nikya ready.");
+        log('> [OK]: API key saved to browser memory.', 'text-emerald-300');
+        speak("Key saved. Nikya online.");
       } else {
         localStorage.removeItem('GEMINI_API_KEY');
         updateStatus(getApiKey() !== null);
-        log('> [WARN]: Key cleared.', 'text-yellow-400');
+        log('> [WARN]: API key removed.', 'text-yellow-400');
       }
     });
 
@@ -165,23 +166,22 @@
       terminalLog.scrollTop = terminalLog.scrollHeight;
     }
 
-    // --- MULTILINGUAL VOICE SYNTHESIS ---
+    // --- NORMAL VOICE SYNTHESIS ENGINE ---
     function speak(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         
-        // Check if text contains Urdu/Arabic Unicode characters
         const isArabicOrUrdu = /[\u0600-\u06FF]/.test(text);
+
+        // Standard, normal pitch and rate
+        utterance.pitch = 1.0; 
+        utterance.rate = 1.0;
 
         if (isArabicOrUrdu) {
           utterance.lang = langSelect.value; // 'ur-PK' or 'ar-SA'
-          utterance.pitch = 0.9;
-          utterance.rate = 0.9;
         } else {
           utterance.lang = 'en-US';
-          utterance.pitch = 0.60;
-          utterance.rate = 0.85;
         }
 
         const voices = window.speechSynthesis.getVoices();
@@ -205,14 +205,14 @@
             torchTrack = stream.getVideoTracks()[0];
           }
           await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-          log('> [HARDWARE]: LED Flashlight ON.', 'text-yellow-300');
+          log('> [HARDWARE]: Flashlight ON.', 'text-yellow-300');
         } else {
           if (torchTrack) {
             await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
             torchTrack.stop();
             torchTrack = null;
           }
-          log('> [HARDWARE]: LED Flashlight OFF.', 'text-yellow-300');
+          log('> [HARDWARE]: Flashlight OFF.', 'text-yellow-300');
         }
       } catch (err) {
         log(`> Flashlight error: ${err.message}`, 'text-red-400');
@@ -241,18 +241,19 @@
     const systemTools = [{
       functionDeclarations: [{
         name: "control_phone",
-        description: "Controls mobile phone hardware actions.",
+        description: "Executes mobile hardware control commands.",
         parameters: {
           type: "OBJECT",
           properties: {
             action: { type: "STRING", description: "flashlight_on, flashlight_off, open_app, set_alarm" },
-            detail: { type: "STRING", description: "Target app name or setting detail." }
+            detail: { type: "STRING", description: "Target app name or detail." }
           },
           required: ["action"]
         }
       }]
     }];
 
+    // Speech Recognition Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -264,7 +265,7 @@
         arcReactor.classList.add('core-active');
         micIcon.className = 'fa-solid fa-terminal text-3xl text-emerald-300 animate-pulse';
         instructionText.textContent = 'NIKYA LISTENING...';
-        log(`> [MIC]: Capture active (${langSelect.value}).`, 'text-emerald-500');
+        log(`> [MIC]: Active (${langSelect.value})...`, 'text-emerald-500');
       };
 
       recognition.onresult = (event) => {
@@ -297,19 +298,19 @@
     arcReactor.addEventListener('click', () => {
       const apiKey = getApiKey();
       if (!apiKey) {
-        log('> [ERR]: Enter Gemini API key above and tap [EXEC] first.', 'text-yellow-400');
-        speak("API key missing. Enter key to initialize Nikya.");
+        log('> [ERR]: Set Gemini API Key above and click [EXEC].', 'text-yellow-400');
+        speak("API key missing. Enter key first.");
         return;
       }
       if (isListening) {
         recognition.stop();
       } else {
-        // Set speech recognition language from dropdown before starting
         recognition.lang = langSelect.value;
         recognition.start();
       }
     });
 
+    // --- GEMINI API CALL WITH ROBUST ERROR HANDLING ---
     async function processUserPrompt(promptText) {
       const apiKey = getApiKey();
       if (!apiKey) return;
@@ -319,13 +320,16 @@
       const startTime = Date.now();
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{
+              role: "user",
               parts: [{
-                text: `You are Nikya, an authoritative AI system. Always reply in the exact language spoken by the user (Urdu, Arabic, or English). If user asks for hardware commands (flashlight, open app, settings, alarm), invoke 'control_phone'. Otherwise reply in 1 short spoken sentence in their language without formatting. Request: ${promptText}`
+                text: `You are Nikya, a helpful AI assistant. Always reply in the exact language spoken by the user (Urdu, Arabic, or English). If the user asks for hardware actions (flashlight, open app, settings, alarm), invoke 'control_phone'. Otherwise reply in 1 short spoken sentence in their language without formatting. Request: ${promptText}`
               }]
             }],
             tools: systemTools
@@ -335,9 +339,16 @@
         const data = await response.json();
         latencyDisplay.textContent = `${Date.now() - startTime}ms`;
 
-        if (data.error) {
-          log(`> [API ERROR]: ${data.error.message}`, 'text-red-400');
-          speak("API request failed.");
+        if (!response.ok || data.error) {
+          const errorMsg = data.error?.message || `HTTP status ${response.status}`;
+          log(`> [API ERROR]: ${errorMsg}`, 'text-red-400');
+          
+          if (errorMsg.includes("API key not valid") || errorMsg.includes("API_KEY_INVALID")) {
+            log('> Fix: Make sure your key from Google AI Studio is correct.', 'text-yellow-300');
+            speak("Invalid API key. Please re-enter your key.");
+          } else {
+            speak("API request failed. Check console log.");
+          }
           return;
         }
 
@@ -361,6 +372,7 @@
         }
       } catch (err) {
         log(`> Network Error: ${err.message}`, 'text-red-400');
+        speak("Network request failed.");
       } finally {
         instructionText.textContent = 'SYSTEM READY // TAP CORE TO ENGAGE NIKYA';
       }
