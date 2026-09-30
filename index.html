@@ -42,7 +42,7 @@
 <body class="min-h-screen flex flex-col justify-between p-3 max-w-md mx-auto relative overflow-x-hidden">
 
   <!-- Top Hacker API & Language Panel -->
-  <header class="w-full bg-black/90 border border-hacker p-3 rounded-lg shadow-lg flex flex-col gap-2">
+  <header class="w-full bg-black/90 border border-hacker p-3 rounded-lg shadow-lg flex flex-col gap-2 z-10">
     <div class="flex items-center justify-between">
       <span class="mono-font text-emerald-400 font-bold text-sm tracking-widest flex items-center gap-2 glow-text">
         <i class="fa-solid fa-terminal animate-pulse"></i> NIKYA_CORE // MULTI
@@ -52,7 +52,7 @@
       </span>
     </div>
 
-    <!-- Language Selector Dropdown -->
+    <!-- Language Selector Dropdown & API Input -->
     <div class="flex gap-2">
       <select id="langSelect" class="bg-zinc-950 border border-emerald-600/60 rounded px-2 py-1 text-xs text-emerald-300 focus:outline-none font-mono">
         <option value="en-US">English (US)</option>
@@ -92,13 +92,13 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# system online. ready for input.</p>
+      <p class="text-emerald-700">> root@nikya:~# system initialized with key.</p>
     </div>
   </footer>
 
   <script>
-    // Embed your API key inside the quotes if you want it hardcoded permanently:
-    const HARDCODED_API_KEY = "";
+    // --- PERMANENT HARDCODED API KEY ---
+    const HARDCODED_API_KEY = "AQ.Ab8RN6LuTuqNdfaFsN2jg30iYUNV6Zj5DFmdp1UZXxET4T-rqQ";
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
@@ -127,7 +127,7 @@
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus(true);
-        log('> [SYSTEM]: Core online. Multilingual listening engine active.', 'text-emerald-400');
+        log('> [SYSTEM]: Core online. Hardcoded key active.', 'text-emerald-400');
       } else {
         updateStatus(false);
         log('> [!] API key required. Enter key above and tap [EXEC].', 'text-yellow-400');
@@ -139,12 +139,12 @@
       if (key) {
         localStorage.setItem('GEMINI_API_KEY', key);
         updateStatus(true);
-        log('> [OK]: API key saved to browser memory.', 'text-emerald-300');
-        speak("Key saved. Nikya online.");
+        log('> [OK]: Key saved to local storage.', 'text-emerald-300');
+        speak("Key updated. Nikya online.");
       } else {
         localStorage.removeItem('GEMINI_API_KEY');
         updateStatus(getApiKey() !== null);
-        log('> [WARN]: API key removed.', 'text-yellow-400');
+        log('> [WARN]: Local key cleared. Falling back to hardcoded key.', 'text-yellow-400');
       }
     });
 
@@ -171,15 +171,13 @@
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        
         const isArabicOrUrdu = /[\u0600-\u06FF]/.test(text);
 
-        // Standard, normal pitch and rate
         utterance.pitch = 1.0; 
         utterance.rate = 1.0;
 
         if (isArabicOrUrdu) {
-          utterance.lang = langSelect.value; // 'ur-PK' or 'ar-SA'
+          utterance.lang = langSelect.value;
         } else {
           utterance.lang = 'en-US';
         }
@@ -241,19 +239,18 @@
     const systemTools = [{
       functionDeclarations: [{
         name: "control_phone",
-        description: "Executes mobile hardware control commands.",
+        description: "Executes mobile hardware commands.",
         parameters: {
           type: "OBJECT",
           properties: {
             action: { type: "STRING", description: "flashlight_on, flashlight_off, open_app, set_alarm" },
-            detail: { type: "STRING", description: "Target app name or detail." }
+            detail: { type: "STRING", description: "Target app or detail." }
           },
           required: ["action"]
         }
       }]
     }];
 
-    // Speech Recognition Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -298,7 +295,7 @@
     arcReactor.addEventListener('click', () => {
       const apiKey = getApiKey();
       if (!apiKey) {
-        log('> [ERR]: Set Gemini API Key above and click [EXEC].', 'text-yellow-400');
+        log('> [ERR]: No API Key set. Enter key above & tap [EXEC].', 'text-yellow-400');
         speak("API key missing. Enter key first.");
         return;
       }
@@ -310,7 +307,6 @@
       }
     });
 
-    // --- GEMINI API CALL WITH ROBUST ERROR HANDLING ---
     async function processUserPrompt(promptText) {
       const apiKey = getApiKey();
       if (!apiKey) return;
@@ -320,16 +316,15 @@
       const startTime = Date.now();
 
       try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
         
-        const response = await fetch(endpoint, {
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{
-              role: "user",
               parts: [{
-                text: `You are Nikya, a helpful AI assistant. Always reply in the exact language spoken by the user (Urdu, Arabic, or English). If the user asks for hardware actions (flashlight, open app, settings, alarm), invoke 'control_phone'. Otherwise reply in 1 short spoken sentence in their language without formatting. Request: ${promptText}`
+                text: `You are Nikya, an AI assistant. Reply in the exact language spoken by the user (Urdu, Arabic, or English). If user asks for hardware actions (flashlight, open app, settings, alarm), trigger 'control_phone'. Otherwise reply in 1 short spoken sentence in their language. Request: ${promptText}`
               }]
             }],
             tools: systemTools
@@ -340,15 +335,9 @@
         latencyDisplay.textContent = `${Date.now() - startTime}ms`;
 
         if (!response.ok || data.error) {
-          const errorMsg = data.error?.message || `HTTP status ${response.status}`;
-          log(`> [API ERROR]: ${errorMsg}`, 'text-red-400');
-          
-          if (errorMsg.includes("API key not valid") || errorMsg.includes("API_KEY_INVALID")) {
-            log('> Fix: Make sure your key from Google AI Studio is correct.', 'text-yellow-300');
-            speak("Invalid API key. Please re-enter your key.");
-          } else {
-            speak("API request failed. Check console log.");
-          }
+          const errDetail = data.error?.message || `Status ${response.status}`;
+          log(`> [API ERROR]: ${errDetail}`, 'text-red-400');
+          speak("API request failed.");
           return;
         }
 
@@ -372,7 +361,6 @@
         }
       } catch (err) {
         log(`> Network Error: ${err.message}`, 'text-red-400');
-        speak("Network request failed.");
       } finally {
         instructionText.textContent = 'SYSTEM READY // TAP CORE TO ENGAGE NIKYA';
       }
