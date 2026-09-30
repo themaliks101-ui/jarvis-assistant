@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NIKYA // CYBER TERMINAL</title>
+  <title>NIKYA // MULTILINGUAL TERMINAL</title>
   
   <!-- Native Mobile PWA Settings -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -41,20 +41,27 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-3 max-w-md mx-auto relative overflow-x-hidden">
 
-  <!-- Top Hacker API Key Panel -->
+  <!-- Top Hacker API & Language Panel -->
   <header class="w-full bg-black/90 border border-hacker p-3 rounded-lg shadow-lg flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <span class="mono-font text-emerald-400 font-bold text-sm tracking-widest flex items-center gap-2 glow-text">
-        <i class="fa-solid fa-terminal animate-pulse"></i> NIKYA_CORE // v3.0
+        <i class="fa-solid fa-terminal animate-pulse"></i> NIKYA_CORE // MULTI
       </span>
       <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded border border-yellow-500/50 bg-yellow-950/40 text-yellow-400 font-mono">
         NO_KEY
       </span>
     </div>
+
+    <!-- Language Selector Dropdown -->
     <div class="flex gap-2">
-      <input type="password" id="apiKeyInput" placeholder="> Paste Gemini API Key" 
-             class="flex-1 bg-zinc-950 border border-emerald-600/60 rounded px-2.5 py-1.5 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400 font-mono placeholder-emerald-800">
-      <button id="saveKeyBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-3 py-1.5 rounded transition-all active:scale-95 mono-font">
+      <select id="langSelect" class="bg-zinc-950 border border-emerald-600/60 rounded px-2 py-1 text-xs text-emerald-300 focus:outline-none font-mono">
+        <option value="en-US">English (US)</option>
+        <option value="ur-PK">Urdu (پاکستان)</option>
+        <option value="ar-SA">Arabic (العربية)</option>
+      </select>
+      <input type="password" id="apiKeyInput" placeholder="> Gemini API Key" 
+             class="flex-1 bg-zinc-950 border border-emerald-600/60 rounded px-2.5 py-1 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400 font-mono placeholder-emerald-800">
+      <button id="saveKeyBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-3 py-1 rounded transition-all active:scale-95 mono-font">
         [EXEC]
       </button>
     </div>
@@ -85,17 +92,16 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# system initialized.</p>
+      <p class="text-emerald-700">> root@nikya:~# multilingual system initialized.</p>
     </div>
   </footer>
 
   <script>
-    // --- EMBEDDED FALLBACK KEY ---
-    // If you want your API key hardcoded forever, paste it between the quotes below:
     const HARDCODED_API_KEY = "";
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const langSelect = document.getElementById('langSelect');
     const statusBadge = document.getElementById('statusBadge');
     const arcReactor = document.getElementById('arcReactor');
     const micIcon = document.getElementById('micIcon');
@@ -120,7 +126,7 @@
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus(true);
-        log('> [SYSTEM]: Core online. Nikya listening engine active.', 'text-emerald-400');
+        log('> [SYSTEM]: Core online. Multilingual listening engine active.', 'text-emerald-400');
       } else {
         updateStatus(false);
         log('> [!] API key required. Enter key above and tap [EXEC].', 'text-yellow-400');
@@ -132,12 +138,12 @@
       if (key) {
         localStorage.setItem('GEMINI_API_KEY', key);
         updateStatus(true);
-        log('> [OK]: API key loaded into local environment.', 'text-emerald-300');
-        speak("Key loaded. Nikya ready for deployment.");
+        log('> [OK]: API key loaded.', 'text-emerald-300');
+        speak("Key loaded. Nikya ready.");
       } else {
         localStorage.removeItem('GEMINI_API_KEY');
         updateStatus(getApiKey() !== null);
-        log('> [WARN]: Local key cleared.', 'text-yellow-400');
+        log('> [WARN]: Key cleared.', 'text-yellow-400');
       }
     });
 
@@ -159,24 +165,29 @@
       terminalLog.scrollTop = terminalLog.scrollHeight;
     }
 
-    // Bold, Serious Voice Synthesis Engine
+    // --- MULTILINGUAL VOICE SYNTHESIS ---
     function speak(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.pitch = 0.60; // Deep pitch
-        utterance.rate = 0.85;  // Slow authoritative pace
+        
+        // Check if text contains Urdu/Arabic Unicode characters
+        const isArabicOrUrdu = /[\u0600-\u06FF]/.test(text);
+
+        if (isArabicOrUrdu) {
+          utterance.lang = langSelect.value; // 'ur-PK' or 'ar-SA'
+          utterance.pitch = 0.9;
+          utterance.rate = 0.9;
+        } else {
+          utterance.lang = 'en-US';
+          utterance.pitch = 0.60;
+          utterance.rate = 0.85;
+        }
 
         const voices = window.speechSynthesis.getVoices();
-        const seriousVoice = voices.find(v => 
-          v.lang.includes('en') && (
-            v.name.includes('Male') || 
-            v.name.includes('UK English Male') || 
-            v.name.includes('Google') ||
-            v.name.includes('Natural')
-          )
-        );
-        if (seriousVoice) utterance.voice = seriousVoice;
+        const matchingVoice = voices.find(v => v.lang.startsWith(utterance.lang.substring(0, 2)));
+        if (matchingVoice) utterance.voice = matchingVoice;
+
         window.speechSynthesis.speak(utterance);
       }
     }
@@ -185,7 +196,7 @@
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // Native Phone Controls
+    // --- NATIVE HARDWARE CONTROLS ---
     async function toggleFlashlight(turnOn) {
       try {
         if (turnOn) {
@@ -194,14 +205,14 @@
             torchTrack = stream.getVideoTracks()[0];
           }
           await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-          log('> [HARDWARE]: LED Flashlight set to HIGH.', 'text-yellow-300');
+          log('> [HARDWARE]: LED Flashlight ON.', 'text-yellow-300');
         } else {
           if (torchTrack) {
             await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
             torchTrack.stop();
             torchTrack = null;
           }
-          log('> [HARDWARE]: LED Flashlight deactivated.', 'text-yellow-300');
+          log('> [HARDWARE]: LED Flashlight OFF.', 'text-yellow-300');
         }
       } catch (err) {
         log(`> Flashlight error: ${err.message}`, 'text-red-400');
@@ -227,7 +238,6 @@
       }
     }
 
-    // Gemini Tool Declaration
     const systemTools = [{
       functionDeclarations: [{
         name: "control_phone",
@@ -243,7 +253,6 @@
       }]
     }];
 
-    // Speech Recognition Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -255,7 +264,7 @@
         arcReactor.classList.add('core-active');
         micIcon.className = 'fa-solid fa-terminal text-3xl text-emerald-300 animate-pulse';
         instructionText.textContent = 'NIKYA LISTENING...';
-        log('> [MIC]: Audio capture stream active.', 'text-emerald-500');
+        log(`> [MIC]: Capture active (${langSelect.value}).`, 'text-emerald-500');
       };
 
       recognition.onresult = (event) => {
@@ -276,8 +285,6 @@
       };
 
       recognition.onend = () => { stopListening(); };
-    } else {
-      log('> [!] Speech recognition unsupported on this browser.', 'text-red-400');
     }
 
     function stopListening() {
@@ -294,8 +301,13 @@
         speak("API key missing. Enter key to initialize Nikya.");
         return;
       }
-      if (isListening) recognition.stop();
-      else recognition.start();
+      if (isListening) {
+        recognition.stop();
+      } else {
+        // Set speech recognition language from dropdown before starting
+        recognition.lang = langSelect.value;
+        recognition.start();
+      }
     });
 
     async function processUserPrompt(promptText) {
@@ -313,7 +325,7 @@
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `You are Nikya, a serious, authoritative AI system. If user requests hardware actions (flashlight, open apps, settings, alarm), invoke 'control_phone'. Otherwise answer in 1 concise, direct spoken sentence without markdown. Request: ${promptText}`
+                text: `You are Nikya, an authoritative AI system. Always reply in the exact language spoken by the user (Urdu, Arabic, or English). If user asks for hardware commands (flashlight, open app, settings, alarm), invoke 'control_phone'. Otherwise reply in 1 short spoken sentence in their language without formatting. Request: ${promptText}`
               }]
             }],
             tools: systemTools
@@ -325,7 +337,7 @@
 
         if (data.error) {
           log(`> [API ERROR]: ${data.error.message}`, 'text-red-400');
-          speak("API request failed. Check key validity.");
+          speak("API request failed.");
           return;
         }
 
@@ -333,17 +345,19 @@
 
         if (candidate?.functionCall) {
           const args = candidate.functionCall.args;
-          log(`> [EXEC]: ${args.action} ${args.detail ? '(' + args.detail + ')' : ''}`, 'text-yellow-300 font-bold');
+          log(`> [EXEC]: ${args.action}`, 'text-yellow-300 font-bold');
           launchNativeAction(args.action, args.detail);
-          const reply = `Executing ${args.action.replace('_', ' ')} immediately.`;
+          
+          let reply = `Executing ${args.action.replace('_', ' ')}.`;
+          if (langSelect.value === 'ur-PK') reply = "حکم کی تعمیل کی جا رہی ہے۔";
+          else if (langSelect.value === 'ar-SA') reply = "جاري تنفيذ الأمر.";
+
           log(`> Nikya: ${reply}`, 'text-emerald-300');
           speak(reply);
         } else if (candidate?.text) {
           const aiReply = candidate.text.trim();
           log(`> Nikya: ${aiReply}`, 'text-emerald-300');
           speak(aiReply);
-        } else {
-          log('> [WARN]: Empty response received from model.', 'text-yellow-400');
         }
       } catch (err) {
         log(`> Network Error: ${err.message}`, 'text-red-400');
