@@ -1,286 +1,98 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NIKYA // CYBER TERMINAL</title>
+  
   <!-- Native Mobile PWA Settings -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#030712">
-  <link rel="manifest" href='data:application/manifest+json,{"name":"J.A.R.V.I.S. OS","short_name":"JARVIS","start_url":"./","display":"standalone","background_color":"#030712","theme_color":"#030712","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2097/2097276.png","sizes":"512x512","type":"image/png"}]}'>
+  <meta name="theme-color" content="#030804">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"NIKYA OS","short_name":"NIKYA","start_url":"./","display":"standalone","background_color":"#030804","theme_color":"#030804","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2097/2097276.png","sizes":"512x512","type":"image/png"}]}'>
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2097/2097276.png">
-  <title>J.A.R.V.I.S. Mobile Assistant</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
   <style>
     body {
-      background-color: #030712;
-      color: #e0f2fe;
-      font-family: 'Inter', sans-serif;
+      background-color: #030804;
+      color: #00ff66;
+      font-family: 'Fira Code', monospace;
       touch-action: manipulation;
     }
-    .orbitron { font-family: 'Orbitron', sans-serif; }
-    .glow-cyan { box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); }
-    .glow-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.7); }
+    .mono-font { font-family: 'Share Tech Mono', monospace; }
+    .glow-green { box-shadow: 0 0 20px rgba(0, 255, 102, 0.4); }
+    .glow-text { text-shadow: 0 0 10px rgba(0, 255, 102, 0.8); }
+    .border-hacker { border-color: rgba(0, 255, 102, 0.35); }
     
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 35px rgba(0, 240, 255, 0.8); }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    @keyframes pulse-hacker {
+      0% { transform: scale(0.96); opacity: 0.85; box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); }
+      50% { transform: scale(1.04); opacity: 1; box-shadow: 0 0 35px rgba(0, 255, 102, 0.9); }
+      100% { transform: scale(0.96); opacity: 0.85; box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); }
     }
-    .reactor-active {
-      animation: pulse-ring 2s infinite ease-in-out;
+    .core-active {
+      animation: pulse-hacker 1.8s infinite ease-in-out;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
+<body class="min-h-screen flex flex-col justify-between p-3 max-w-md mx-auto relative overflow-x-hidden">
 
-  <!-- Top Pinned Mobile API Bar -->
-  <header class="w-full bg-slate-900/90 backdrop-blur-md border border-cyan-500/40 p-3 rounded-xl shadow-lg flex flex-col gap-2">
+  <!-- Top Hacker API Key Panel -->
+  <header class="w-full bg-black/90 border border-hacker p-3 rounded-lg shadow-lg flex flex-col gap-2">
     <div class="flex items-center justify-between">
-      <i class="fa-solid fa-microchip animate-pulse"></i> NIKYA OS
-        <i class="fa-solid fa-microchip animate-pulse"></i> J.A.R.V.I.S. OS
+      <span class="mono-font text-emerald-400 font-bold text-sm tracking-widest flex items-center gap-2 glow-text">
+        <i class="fa-solid fa-terminal animate-pulse"></i> NIKYA_CORE // v3.0
       </span>
-      <span id="statusBadge" class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/40">
-        Needs API Key
+      <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded border border-yellow-500/50 bg-yellow-950/40 text-yellow-400 font-mono">
+        NO_KEY
       </span>
     </div>
     <div class="flex gap-2">
-      <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key" 
-             class="flex-1 bg-slate-950 border border-cyan-500/50 rounded-lg px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-400">
-      <button id="saveKeyBtn" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all active:scale-95">
-        SAVE
+      <input type="password" id="apiKeyInput" placeholder="> Paste Gemini API Key" 
+             class="flex-1 bg-zinc-950 border border-emerald-600/60 rounded px-2.5 py-1.5 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400 font-mono placeholder-emerald-800">
+      <button id="saveKeyBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-3 py-1.5 rounded transition-all active:scale-95 mono-font">
+        [EXEC]
       </button>
     </div>
   </header>
 
-  <!-- Central Arc Reactor Core -->
-  <main class="flex-1 flex flex-col items-center justify-center my-8 text-center">
-    <div id="arcReactor" class="w-44 h-44 rounded-full border-4 border-cyan-400/80 bg-slate-900/80 flex items-center justify-center cursor-pointer transition-all duration-300 glow-cyan relative active:scale-90">
-      <div class="w-32 h-32 rounded-full border-2 border-dashed border-cyan-300 flex items-center justify-center bg-cyan-950/30">
-        <div class="w-20 h-20 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center">
-          <i id="micIcon" class="fa-solid fa-microphone text-4xl text-cyan-400 glow-text"></i>
+  <!-- Central Matrix Cyber Core -->
+  <main class="flex-1 flex flex-col items-center justify-center my-6 text-center">
+    <div id="arcReactor" class="w-44 h-44 rounded-full border-2 border-emerald-500/70 bg-zinc-950 flex items-center justify-center cursor-pointer transition-all duration-300 glow-green relative active:scale-90">
+      <div class="w-32 h-32 rounded-full border border-dashed border-emerald-400/60 flex items-center justify-center bg-emerald-950/20">
+        <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-400 flex items-center justify-center">
+          <i id="micIcon" class="fa-solid fa-code text-3xl text-emerald-400 glow-text"></i>
         </div>
       </div>
     </div>
     
-    <p id="instructionText" class="mt-6 text-sm text-cyan-300/80 orbitron tracking-wide px-4">
-      TAP CORE TO ENGAGE NIKYA
+    <p id="instructionText" class="mt-6 text-xs text-emerald-400 mono-font tracking-widest px-2 glow-text">
+      SYSTEM READY // TAP CORE TO ENGAGE NIKYA
     </p>
-    <p id="liveTranscript" class="mt-2 text-xs text-slate-400 italic min-h-[20px] px-4">
-      "Awaiting speech input..."
+    <p id="liveTranscript" class="mt-2 text-[11px] text-zinc-500 italic min-h-[18px] px-2 font-mono">
+      > awaiting vocal input...
     </p>
   </main>
 
-  <!-- Terminal Output Window -->
-  <footer class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-left">
-    <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-800">
-      <span class="text-[10px] orbitron text-slate-400 uppercase tracking-wider">System Output</span>
-      <span class="text-[10px] text-cyan-500/70" id="latencyDisplay">0 ms</span>
+  <!-- Hacker Terminal Output Window -->
+  <footer class="w-full bg-black border border-emerald-800/80 rounded-lg p-3 text-left font-mono">
+    <div class="flex items-center justify-between mb-1 pb-1 border-b border-emerald-900/80">
+      <span class="text-[10px] text-emerald-500 uppercase tracking-widest">[CONSOLE_LOG]</span>
+      <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
-    <div id="terminalLog" class="text-xs text-cyan-200 font-mono h-24 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-slate-500">> System initialized. Ready for user input.</p>
+    <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
+      <p class="text-emerald-700">> root@nikya:~# system initialized.</p>
     </div>
   </footer>
 
   <script>
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const saveKeyBtn = document.getElementById('saveKeyBtn');
-    const statusBadge = document.getElementById('statusBadge');
-    const arcReactor = document.getElementById('arcReactor');
-    const micIcon = document.getElementById('micIcon');
-    const instructionText = document.getElementById('instructionText');
-    const liveTranscript = document.getElementById('liveTranscript');
-    const terminalLog = document.getElementById('terminalLog');
-    const latencyDisplay = document.getElementById('latencyDisplay');
-
-    let isListening = false;
-    let recognition = null;
-    let torchTrack = null; // Native Flashlight Hardware Track
-
-    // Load saved API key on startup
-    const savedKey = localStorage.getItem('GEMINI_API_KEY');
-    if (savedKey) {
-      apiKeyInput.value = savedKey;
-      updateStatus(true);
-    }
-
-    saveKeyBtn.addEventListener('click', () => {
-      const key = apiKeyInput.value.trim();
-      if (key) {
-        localStorage.setItem('GEMINI_API_KEY', key);
-        updateStatus(true);
-        log('> GEMINI API Key stored successfully.', 'text-green-400');
-        speak("API Key configured. Direct device hardware control initialized, Sir.");
-      } else {
-        localStorage.removeItem('GEMINI_API_KEY');
-        updateStatus(false);
-        log('> GEMINI API Key cleared.', 'text-yellow-400');
-      }
-    });
-
-    function updateStatus(active) {
-      if (active) {
-        statusBadge.textContent = 'CORE ONLINE';
-        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
-      } else {
-        statusBadge.textContent = 'NEEDS API KEY';
-        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/40';
-      }
-    }
-
-    function log(msg, colorClass = 'text-cyan-200') {
-      const p = document.createElement('p');
-      p.className = colorClass;
-      p.textContent = msg;
-      terminalLog.appendChild(p);
-      terminalLog.scrollTop = terminalLog.scrollHeight;
-    }
-
-    function speak(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.0;
-        utterance.pitch = 0.9;
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-
-    // --- NATIVE HARDWARE CONTROLS (MADE BY US, 100% FREE) ---
-
-    // 1. Native Camera Torch / Flashlight Control
-    async function toggleFlashlight(turnOn) {
-      try {
-        if (turnOn) {
-          if (!torchTrack) {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: { exact: 'environment' } }
-            });
-            torchTrack = stream.getVideoTracks()[0];
-          }
-          await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-          log('> [HARDWARE]: Flashlight turned ON', 'text-yellow-300');
-        } else {
-          if (torchTrack) {
-            await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
-            torchTrack.stop();
-            torchTrack = null;
-          }
-          log('> [HARDWARE]: Flashlight turned OFF', 'text-yellow-300');
-        }
-      } catch (err) {
-        log(`> Torch Error: ${err.message}`, 'text-red-400');
-      }
-    }
-
-    // 2. Native Android Intent App Launcher
-    function launchNativeAction(action, detail = '') {
-      const target = (detail || '').toLowerCase();
-
-      // Haptic Vibration feedback
-      if ('vibrate' in navigator) navigator.vibrate(200);
-
-      if (action === 'flashlight_on') toggleFlashlight(true);
-      else if (action === 'flashlight_off') toggleFlashlight(false);
-      else if (action === 'open_app') {
-        if (target.includes('whatsapp')) window.location.href = 'whatsapp://';
-        else if (target.includes('youtube')) window.location.href = 'https://youtube.com';
-        else if (target.includes('map') || target.includes('navigation')) window.location.href = 'https://maps.google.com';
-        else if (target.includes('camera')) window.location.href = 'intent://com.android.camera/#Intent;scheme=launch;package=com.android.camera;end';
-        else if (target.includes('clock') || target.includes('alarm')) window.location.href = 'intent://com.android.deskclock/#Intent;scheme=launch;package=com.android.deskclock;end';
-        else if (target.includes('setting')) window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
-        else window.location.href = `https://www.google.com/search?q=${encodeURIComponent(detail)}`;
-      } else if (action === 'set_alarm') {
-        window.location.href = 'intent://com.android.deskclock/#Intent;scheme=launch;package=com.android.deskclock;end';
-      }
-    }
-
-    // --- GEMINI AI & VOICE LOGIC WITH FUNCTION CALLING ---
-    const systemTools = [{
-      functionDeclarations: [{
-        name: "control_phone",
-        description: "Executes hardware actions directly on the user's phone.",
-        parameters: {
-          type: "OBJECT",
-          properties: {
-            action: { 
-              type: "STRING", 
-              description: "Action type: 'flashlight_on', 'flashlight_off', 'open_app', 'set_alarm'" 
-            },
-            detail: { 
-              type: "STRING", 
-              description: "App name (e.g., 'WhatsApp', 'YouTube', 'Settings', 'Camera') or alarm details." 
-            }
-          },
-          required: ["action"]
-        }
-      }]
-    }];
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-
-      recognition.onstart = () => {
-        isListening = true;
-        arcReactor.classList.add('reactor-active');
-        micIcon.className = 'fa-solid fa-waveform text-4xl text-cyan-300 animate-bounce';
-        instructionText.textContent = 'LISTENING...';
-      };
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        liveTranscript.textContent = `"${transcript}"`;
-
-        if (event.results[0].isFinal) {
-          processUserPrompt(transcript);
-        }
-      };
-
-      recognition.onerror = (e) => {
-        log(`> Mic Error: ${e.error}`, 'text-red-400');
-        stopListening();
-      };
-
-      recognition.onend = () => { stopListening(); };
-    }
-
-    function stopListening() {
-      isListening = false;
-      arcReactor.classList.remove('reactor-active');
-      micIcon.className = 'fa-solid fa-microphone text-4xl text-cyan-400 glow-text';
-      instructionText.textContent = 'TAP ARC REACTOR TO ENGAGE';
-    }
-
-    arcReactor.addEventListener('click', () => {
-      const key = localStorage.getItem('GEMINI_API_KEY');
-      if (!key) {
-        log('> Error: Enter and save your Gemini API Key first.', 'text-yellow-400');
-        speak("Please enter your API key at the top first.");
-        return;
-      }
-      if (isListening) recognition.stop();
-      else recognition.start();
-    });
-
-    async function processUserPrompt(promptText) {
-      const apiKey = localStorage.getItem('GEMINI_API_KEY');
-      if (!apiKey) return;
-
-
-  </script>
-      <script>
-    // --- PERMANENT API KEY FALLBACK ---
-    // Replace the text below with your actual Gemini API Key so clearing cache never loses it!
-    const EMBEDDED_API_KEY = "AQ.Ab8RN6J6dNQxRQMhhXsw2pas0qZ4tJuVB2TKYSej7L_p4aeXtA";
+    // --- EMBEDDED FALLBACK KEY ---
+    // If you want your API key hardcoded forever, paste it between the quotes below:
+    const HARDCODED_API_KEY = "";
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
@@ -296,23 +108,22 @@
     let recognition = null;
     let torchTrack = null;
 
-    // Helper to retrieve key (LocalStorage priority, fallback to embedded)
     function getApiKey() {
       const stored = localStorage.getItem('GEMINI_API_KEY');
       if (stored && stored.trim() !== "") return stored.trim();
-      if (EMBEDDED_API_KEY && EMBEDDED_API_KEY !== "PASTE_YOUR_GEMINI_API_KEY_HERE") return EMBEDDED_API_KEY;
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim() !== "") return HARDCODED_API_KEY.trim();
       return null;
     }
 
-    // Initialize status on boot
     window.addEventListener('DOMContentLoaded', () => {
       const activeKey = getApiKey();
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus(true);
-        log('> Nikya System Initialized. Core Online.', 'text-cyan-400');
+        log('> [SYSTEM]: Core online. Nikya listening engine active.', 'text-emerald-400');
       } else {
         updateStatus(false);
+        log('> [!] API key required. Enter key above and tap [EXEC].', 'text-yellow-400');
       }
     });
 
@@ -321,26 +132,26 @@
       if (key) {
         localStorage.setItem('GEMINI_API_KEY', key);
         updateStatus(true);
-        log('> Custom API Key stored successfully.', 'text-green-400');
-        speak("Configuration accepted. Nikya online and awaiting commands.");
+        log('> [OK]: API key loaded into local environment.', 'text-emerald-300');
+        speak("Key loaded. Nikya ready for deployment.");
       } else {
         localStorage.removeItem('GEMINI_API_KEY');
         updateStatus(getApiKey() !== null);
-        log('> Custom API Key cleared. Default embedded key active.', 'text-yellow-400');
+        log('> [WARN]: Local key cleared.', 'text-yellow-400');
       }
     });
 
     function updateStatus(active) {
       if (active) {
-        statusBadge.textContent = 'NIKYA ONLINE';
-        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+        statusBadge.textContent = 'CORE_ONLINE';
+        statusBadge.className = 'text-[10px] px-2 py-0.5 rounded border border-emerald-500/60 bg-emerald-950/60 text-emerald-300 font-mono';
       } else {
-        statusBadge.textContent = 'NEEDS API KEY';
-        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/40';
+        statusBadge.textContent = 'KEY_MISSING';
+        statusBadge.className = 'text-[10px] px-2 py-0.5 rounded border border-yellow-500/60 bg-yellow-950/60 text-yellow-400 font-mono';
       }
     }
 
-    function log(msg, colorClass = 'text-cyan-200') {
+    function log(msg, colorClass = 'text-emerald-400') {
       const p = document.createElement('p');
       p.className = colorClass;
       p.textContent = msg;
@@ -348,59 +159,52 @@
       terminalLog.scrollTop = terminalLog.scrollHeight;
     }
 
-    // --- BOLD, SERIOUS VOICE SYNTHESIS ENGINE ---
+    // Bold, Serious Voice Synthesis Engine
     function speak(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Deep pitch and deliberate pace for a serious voice
-        utterance.pitch = 0.65; // Lower pitch = deeper tone
-        utterance.rate = 0.88;  // Slower rate = authoritative delivery
+        utterance.pitch = 0.60; // Deep pitch
+        utterance.rate = 0.85;  // Slow authoritative pace
 
-        // Select deep/male/serious voice profile if available on device
         const voices = window.speechSynthesis.getVoices();
         const seriousVoice = voices.find(v => 
           v.lang.includes('en') && (
             v.name.includes('Male') || 
-            v.name.includes('Google UK English Male') || 
-            v.name.includes('Natural') ||
-            v.name.includes('Arthur')
+            v.name.includes('UK English Male') || 
+            v.name.includes('Google') ||
+            v.name.includes('Natural')
           )
         );
         if (seriousVoice) utterance.voice = seriousVoice;
-
         window.speechSynthesis.speak(utterance);
       }
     }
 
-    // Ensure voices load in browsers that load them asynchronously
     if ('speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // --- NATIVE HARDWARE CONTROLS ---
+    // Native Phone Controls
     async function toggleFlashlight(turnOn) {
       try {
         if (turnOn) {
           if (!torchTrack) {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: { exact: 'environment' } }
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } });
             torchTrack = stream.getVideoTracks()[0];
           }
           await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-          log('> [HARDWARE]: Torch activated.', 'text-yellow-300');
+          log('> [HARDWARE]: LED Flashlight set to HIGH.', 'text-yellow-300');
         } else {
           if (torchTrack) {
             await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
             torchTrack.stop();
             torchTrack = null;
           }
-          log('> [HARDWARE]: Torch deactivated.', 'text-yellow-300');
+          log('> [HARDWARE]: LED Flashlight deactivated.', 'text-yellow-300');
         }
       } catch (err) {
-        log(`> Torch Error: ${err.message}`, 'text-red-400');
+        log(`> Flashlight error: ${err.message}`, 'text-red-400');
       }
     }
 
@@ -423,28 +227,23 @@
       }
     }
 
-    // --- NIKYA AI REASONING ENGINE ---
+    // Gemini Tool Declaration
     const systemTools = [{
       functionDeclarations: [{
         name: "control_phone",
-        description: "Executes hardware actions directly on the user's phone.",
+        description: "Controls mobile phone hardware actions.",
         parameters: {
           type: "OBJECT",
           properties: {
-            action: { 
-              type: "STRING", 
-              description: "Action type: 'flashlight_on', 'flashlight_off', 'open_app', 'set_alarm'" 
-            },
-            detail: { 
-              type: "STRING", 
-              description: "Target application or detail." 
-            }
+            action: { type: "STRING", description: "flashlight_on, flashlight_off, open_app, set_alarm" },
+            detail: { type: "STRING", description: "Target app name or setting detail." }
           },
           required: ["action"]
         }
       }]
     }];
 
+    // Speech Recognition Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -453,9 +252,10 @@
 
       recognition.onstart = () => {
         isListening = true;
-        arcReactor.classList.add('reactor-active');
-        micIcon.className = 'fa-solid fa-waveform text-4xl text-cyan-300 animate-bounce';
+        arcReactor.classList.add('core-active');
+        micIcon.className = 'fa-solid fa-terminal text-3xl text-emerald-300 animate-pulse';
         instructionText.textContent = 'NIKYA LISTENING...';
+        log('> [MIC]: Audio capture stream active.', 'text-emerald-500');
       };
 
       recognition.onresult = (event) => {
@@ -463,7 +263,7 @@
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
-        liveTranscript.textContent = `"${transcript}"`;
+        liveTranscript.textContent = `> "${transcript}"`;
 
         if (event.results[0].isFinal) {
           processUserPrompt(transcript);
@@ -476,20 +276,22 @@
       };
 
       recognition.onend = () => { stopListening(); };
+    } else {
+      log('> [!] Speech recognition unsupported on this browser.', 'text-red-400');
     }
 
     function stopListening() {
       isListening = false;
-      arcReactor.classList.remove('reactor-active');
-      micIcon.className = 'fa-solid fa-microphone text-4xl text-cyan-400 glow-text';
-      instructionText.textContent = 'TAP CORE TO ENGAGE NIKYA';
+      arcReactor.classList.remove('core-active');
+      micIcon.className = 'fa-solid fa-code text-3xl text-emerald-400 glow-text';
+      instructionText.textContent = 'SYSTEM READY // TAP CORE TO ENGAGE NIKYA';
     }
 
     arcReactor.addEventListener('click', () => {
       const apiKey = getApiKey();
       if (!apiKey) {
-        log('> Error: Set your Gemini API key in code or input box.', 'text-yellow-400');
-        speak("API key missing. Please configure it to activate Nikya.");
+        log('> [ERR]: Enter Gemini API key above and tap [EXEC] first.', 'text-yellow-400');
+        speak("API key missing. Enter key to initialize Nikya.");
         return;
       }
       if (isListening) recognition.stop();
@@ -501,7 +303,7 @@
       if (!apiKey) return;
 
       log(`> User: ${promptText}`, 'text-white font-bold');
-      instructionText.textContent = 'PROCESSING...';
+      instructionText.textContent = 'PROCESSING PROMPT...';
       const startTime = Date.now();
 
       try {
@@ -511,7 +313,7 @@
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `You are Nikya, an authoritative, highly capable, serious AI system. If the user asks for hardware actions (flashlight, open app, settings, alarm), trigger 'control_phone'. Otherwise reply in 1 concise, serious sentence without formatting. Request: ${promptText}`
+                text: `You are Nikya, a serious, authoritative AI system. If user requests hardware actions (flashlight, open apps, settings, alarm), invoke 'control_phone'. Otherwise answer in 1 concise, direct spoken sentence without markdown. Request: ${promptText}`
               }]
             }],
             tools: systemTools
@@ -519,26 +321,34 @@
         });
 
         const data = await response.json();
-        latencyDisplay.textContent = `${Date.now() - startTime} ms`;
+        latencyDisplay.textContent = `${Date.now() - startTime}ms`;
+
+        if (data.error) {
+          log(`> [API ERROR]: ${data.error.message}`, 'text-red-400');
+          speak("API request failed. Check key validity.");
+          return;
+        }
 
         const candidate = data.candidates?.[0]?.content?.parts?.[0];
 
         if (candidate?.functionCall) {
           const args = candidate.functionCall.args;
-          log(`> Nikya Executing: ${args.action}`, 'text-yellow-300 font-bold');
+          log(`> [EXEC]: ${args.action} ${args.detail ? '(' + args.detail + ')' : ''}`, 'text-yellow-300 font-bold');
           launchNativeAction(args.action, args.detail);
           const reply = `Executing ${args.action.replace('_', ' ')} immediately.`;
-          log(`> Nikya: ${reply}`, 'text-cyan-300');
+          log(`> Nikya: ${reply}`, 'text-emerald-300');
           speak(reply);
         } else if (candidate?.text) {
           const aiReply = candidate.text.trim();
-          log(`> Nikya: ${aiReply}`, 'text-cyan-300');
+          log(`> Nikya: ${aiReply}`, 'text-emerald-300');
           speak(aiReply);
+        } else {
+          log('> [WARN]: Empty response received from model.', 'text-yellow-400');
         }
       } catch (err) {
-        log(`> Request Failed: ${err.message}`, 'text-red-400');
+        log(`> Network Error: ${err.message}`, 'text-red-400');
       } finally {
-        instructionText.textContent = 'TAP CORE TO ENGAGE NIKYA';
+        instructionText.textContent = 'SYSTEM READY // TAP CORE TO ENGAGE NIKYA';
       }
     }
   </script>
