@@ -86,7 +86,6 @@
   </footer>
 
   <script>
-  <script>
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
     const statusBadge = document.getElementById('statusBadge');
@@ -276,8 +275,233 @@
       const apiKey = localStorage.getItem('GEMINI_API_KEY');
       if (!apiKey) return;
 
+
+  </script>
+      <script>
+    // --- PERMANENT API KEY FALLBACK ---
+    // Replace the text below with your actual Gemini API Key so clearing cache never loses it!
+    const EMBEDDED_API_KEY = "AQ.Ab8RN6J6dNQxRQMhhXsw2pas0qZ4tJuVB2TKYSej7L_p4aeXtA";
+
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const statusBadge = document.getElementById('statusBadge');
+    const arcReactor = document.getElementById('arcReactor');
+    const micIcon = document.getElementById('micIcon');
+    const instructionText = document.getElementById('instructionText');
+    const liveTranscript = document.getElementById('liveTranscript');
+    const terminalLog = document.getElementById('terminalLog');
+    const latencyDisplay = document.getElementById('latencyDisplay');
+
+    let isListening = false;
+    let recognition = null;
+    let torchTrack = null;
+
+    // Helper to retrieve key (LocalStorage priority, fallback to embedded)
+    function getApiKey() {
+      const stored = localStorage.getItem('GEMINI_API_KEY');
+      if (stored && stored.trim() !== "") return stored.trim();
+      if (EMBEDDED_API_KEY && EMBEDDED_API_KEY !== "PASTE_YOUR_GEMINI_API_KEY_HERE") return EMBEDDED_API_KEY;
+      return null;
+    }
+
+    // Initialize status on boot
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeKey = getApiKey();
+      if (activeKey) {
+        apiKeyInput.value = activeKey;
+        updateStatus(true);
+        log('> Nikya System Initialized. Core Online.', 'text-cyan-400');
+      } else {
+        updateStatus(false);
+      }
+    });
+
+    saveKeyBtn.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem('GEMINI_API_KEY', key);
+        updateStatus(true);
+        log('> Custom API Key stored successfully.', 'text-green-400');
+        speak("Configuration accepted. Nikya online and awaiting commands.");
+      } else {
+        localStorage.removeItem('GEMINI_API_KEY');
+        updateStatus(getApiKey() !== null);
+        log('> Custom API Key cleared. Default embedded key active.', 'text-yellow-400');
+      }
+    });
+
+    function updateStatus(active) {
+      if (active) {
+        statusBadge.textContent = 'NIKYA ONLINE';
+        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+      } else {
+        statusBadge.textContent = 'NEEDS API KEY';
+        statusBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/40';
+      }
+    }
+
+    function log(msg, colorClass = 'text-cyan-200') {
+      const p = document.createElement('p');
+      p.className = colorClass;
+      p.textContent = msg;
+      terminalLog.appendChild(p);
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    // --- BOLD, SERIOUS VOICE SYNTHESIS ENGINE ---
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Deep pitch and deliberate pace for a serious voice
+        utterance.pitch = 0.65; // Lower pitch = deeper tone
+        utterance.rate = 0.88;  // Slower rate = authoritative delivery
+
+        // Select deep/male/serious voice profile if available on device
+        const voices = window.speechSynthesis.getVoices();
+        const seriousVoice = voices.find(v => 
+          v.lang.includes('en') && (
+            v.name.includes('Male') || 
+            v.name.includes('Google UK English Male') || 
+            v.name.includes('Natural') ||
+            v.name.includes('Arthur')
+          )
+        );
+        if (seriousVoice) utterance.voice = seriousVoice;
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Ensure voices load in browsers that load them asynchronously
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    // --- NATIVE HARDWARE CONTROLS ---
+    async function toggleFlashlight(turnOn) {
+      try {
+        if (turnOn) {
+          if (!torchTrack) {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { exact: 'environment' } }
+            });
+            torchTrack = stream.getVideoTracks()[0];
+          }
+          await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
+          log('> [HARDWARE]: Torch activated.', 'text-yellow-300');
+        } else {
+          if (torchTrack) {
+            await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
+            torchTrack.stop();
+            torchTrack = null;
+          }
+          log('> [HARDWARE]: Torch deactivated.', 'text-yellow-300');
+        }
+      } catch (err) {
+        log(`> Torch Error: ${err.message}`, 'text-red-400');
+      }
+    }
+
+    function launchNativeAction(action, detail = '') {
+      const target = (detail || '').toLowerCase();
+      if ('vibrate' in navigator) navigator.vibrate(150);
+
+      if (action === 'flashlight_on') toggleFlashlight(true);
+      else if (action === 'flashlight_off') toggleFlashlight(false);
+      else if (action === 'open_app') {
+        if (target.includes('whatsapp')) window.location.href = 'whatsapp://';
+        else if (target.includes('youtube')) window.location.href = 'https://youtube.com';
+        else if (target.includes('map') || target.includes('navigation')) window.location.href = 'https://maps.google.com';
+        else if (target.includes('camera')) window.location.href = 'intent://com.android.camera/#Intent;scheme=launch;package=com.android.camera;end';
+        else if (target.includes('clock') || target.includes('alarm')) window.location.href = 'intent://com.android.deskclock/#Intent;scheme=launch;package=com.android.deskclock;end';
+        else if (target.includes('setting')) window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+        else window.location.href = `https://www.google.com/search?q=${encodeURIComponent(detail)}`;
+      } else if (action === 'set_alarm') {
+        window.location.href = 'intent://com.android.deskclock/#Intent;scheme=launch;package=com.android.deskclock;end';
+      }
+    }
+
+    // --- NIKYA AI REASONING ENGINE ---
+    const systemTools = [{
+      functionDeclarations: [{
+        name: "control_phone",
+        description: "Executes hardware actions directly on the user's phone.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            action: { 
+              type: "STRING", 
+              description: "Action type: 'flashlight_on', 'flashlight_off', 'open_app', 'set_alarm'" 
+            },
+            detail: { 
+              type: "STRING", 
+              description: "Target application or detail." 
+            }
+          },
+          required: ["action"]
+        }
+      }]
+    }];
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        isListening = true;
+        arcReactor.classList.add('reactor-active');
+        micIcon.className = 'fa-solid fa-waveform text-4xl text-cyan-300 animate-bounce';
+        instructionText.textContent = 'NIKYA LISTENING...';
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        liveTranscript.textContent = `"${transcript}"`;
+
+        if (event.results[0].isFinal) {
+          processUserPrompt(transcript);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        log(`> Mic Error: ${e.error}`, 'text-red-400');
+        stopListening();
+      };
+
+      recognition.onend = () => { stopListening(); };
+    }
+
+    function stopListening() {
+      isListening = false;
+      arcReactor.classList.remove('reactor-active');
+      micIcon.className = 'fa-solid fa-microphone text-4xl text-cyan-400 glow-text';
+      instructionText.textContent = 'TAP CORE TO ENGAGE NIKYA';
+    }
+
+    arcReactor.addEventListener('click', () => {
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        log('> Error: Set your Gemini API key in code or input box.', 'text-yellow-400');
+        speak("API key missing. Please configure it to activate Nikya.");
+        return;
+      }
+      if (isListening) recognition.stop();
+      else recognition.start();
+    });
+
+    async function processUserPrompt(promptText) {
+      const apiKey = getApiKey();
+      if (!apiKey) return;
+
       log(`> User: ${promptText}`, 'text-white font-bold');
-      instructionText.textContent = 'EXECUTING...';
+      instructionText.textContent = 'PROCESSING...';
       const startTime = Date.now();
 
       try {
@@ -287,7 +511,7 @@
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `You are J.A.R.V.I.S., a phone controller. If the user asks to turn on/off flashlight, open apps, set alarms, or adjust settings, invoke 'control_phone'. Otherwise reply in 1 short spoken sentence. Request: ${promptText}`
+                text: `You are Nikya, an authoritative, highly capable, serious AI system. If the user asks for hardware actions (flashlight, open app, settings, alarm), trigger 'control_phone'. Otherwise reply in 1 concise, serious sentence without formatting. Request: ${promptText}`
               }]
             }],
             tools: systemTools
@@ -301,23 +525,22 @@
 
         if (candidate?.functionCall) {
           const args = candidate.functionCall.args;
-          log(`> Executing: ${args.action} ${args.detail ? '(' + args.detail + ')' : ''}`, 'text-yellow-300 font-bold');
+          log(`> Nikya Executing: ${args.action}`, 'text-yellow-300 font-bold');
           launchNativeAction(args.action, args.detail);
-          const reply = `Executing ${args.action.replace('_', ' ')} now, Sir.`;
-          log(`> JARVIS: ${reply}`, 'text-cyan-300');
+          const reply = `Executing ${args.action.replace('_', ' ')} immediately.`;
+          log(`> Nikya: ${reply}`, 'text-cyan-300');
           speak(reply);
         } else if (candidate?.text) {
           const aiReply = candidate.text.trim();
-          log(`> JARVIS: ${aiReply}`, 'text-cyan-300');
+          log(`> Nikya: ${aiReply}`, 'text-cyan-300');
           speak(aiReply);
         }
       } catch (err) {
         log(`> Request Failed: ${err.message}`, 'text-red-400');
       } finally {
-        instructionText.textContent = 'TAP ARC REACTOR TO ENGAGE';
+        instructionText.textContent = 'TAP CORE TO ENGAGE NIKYA';
       }
     }
-  </script>
   </script>
 </body>
 </html>
