@@ -58,7 +58,7 @@
         <option value="en-US">English (US)</option>
         <option value="ar-SA">Arabic (العربية)</option>
       </select>
-      <input type="password" id="apiKeyInput" placeholder="> OpenRouter Key (sk-or-v1-...)" 
+      <input type="password" id="apiKeyInput" placeholder="> Paste OpenRouter Key" 
              class="flex-1 bg-zinc-950 border border-emerald-600/60 rounded px-2.5 py-1 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400 font-mono placeholder-emerald-800">
       <button id="saveKeyBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-3 py-1 rounded transition-all active:scale-95 mono-font">
         [SAVE]
@@ -91,7 +91,7 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# OpenRouter engine active.</p>
+      <p class="text-emerald-700">> root@nikya:~# Ready. Paste key and tap [SAVE].</p>
     </div>
   </footer>
 
@@ -111,10 +111,14 @@
     let recognition = null;
     let torchTrack = null;
 
+    function sanitizeKey(k) {
+      if (!k) return '';
+      return k.replace(/[\s\r\n\t'"]/g, '').trim();
+    }
+
     function getApiKey() {
       const stored = localStorage.getItem('OPENROUTER_API_KEY');
-      if (stored && stored.trim() !== "") return stored.trim();
-      return null;
+      return sanitizeKey(stored);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -122,23 +126,26 @@
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus('AI_ONLINE', 'emerald');
-        log('> [SYSTEM]: OpenRouter Engine loaded.', 'text-emerald-400');
+        log('> [SYSTEM]: Key loaded from storage.', 'text-emerald-400');
       } else {
         updateStatus('NO_KEY', 'yellow');
-        log('> [!] Paste OpenRouter key (sk-or-v1-...) & tap [SAVE].', 'text-yellow-400');
+        log('> [!] Paste key above & tap [SAVE].', 'text-yellow-400');
       }
     });
 
     saveKeyBtn.addEventListener('click', () => {
-      const key = apiKeyInput.value.trim();
-      if (key.startsWith('sk-or-v1-')) {
-        localStorage.setItem('OPENROUTER_API_KEY', key);
+      const rawKey = apiKeyInput.value;
+      const cleanKey = sanitizeKey(rawKey);
+
+      if (cleanKey.length > 10) {
+        localStorage.setItem('OPENROUTER_API_KEY', cleanKey);
+        apiKeyInput.value = cleanKey;
         updateStatus('AI_ONLINE', 'emerald');
-        log('> [OK]: OpenRouter Key saved.', 'text-emerald-300');
-        speak("Key saved. System online.");
+        log('> [OK]: Key sanitized & saved.', 'text-emerald-300');
+        speak("Key saved.");
       } else {
-        log('> [WARN]: OpenRouter keys start with sk-or-v1-...', 'text-yellow-400');
-        speak("Invalid key. Must start with s k or v 1.");
+        log('> [WARN]: Invalid key length.', 'text-yellow-400');
+        speak("Key invalid.");
       }
     });
 
@@ -188,65 +195,7 @@
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // Hardware Controls
-    async function toggleFlashlight(turnOn) {
-      try {
-        if (turnOn) {
-          if (!torchTrack) {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } });
-            torchTrack = stream.getVideoTracks()[0];
-          }
-          await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-          log('> [HARDWARE]: Flashlight ON.', 'text-yellow-300 font-bold');
-        } else {
-          if (torchTrack) {
-            await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
-            torchTrack.stop();
-            torchTrack = null;
-          }
-          log('> [HARDWARE]: Flashlight OFF.', 'text-yellow-300 font-bold');
-        }
-      } catch (err) {
-        log(`> Hardware Error: ${err.message}`, 'text-red-400');
-      }
-    }
-
-    function launchNativeAction(action, detail = '') {
-      const target = (detail || '').toLowerCase();
-      if ('vibrate' in navigator) navigator.vibrate(150);
-
-      if (action === 'flashlight_on') toggleFlashlight(true);
-      else if (action === 'flashlight_off') toggleFlashlight(false);
-      else if (action === 'open_app') {
-        if (target.includes('whatsapp')) window.location.href = 'whatsapp://';
-        else if (target.includes('youtube')) window.location.href = 'https://youtube.com';
-        else if (target.includes('map')) window.location.href = 'https://maps.google.com';
-        else window.location.href = `https://www.google.com/search?q=${encodeURIComponent(detail)}`;
-      }
-    }
-
-    // Offline Commands
-    function processLocalCommands(text) {
-      const t = text.toLowerCase();
-
-      if ((t.includes('flashlight') || t.includes('torch') || t.includes('لاٹ')) && (t.includes('on') || t.includes('chalao') || t.includes('karo') || t.includes('jalat') || t.includes('تشغيل'))) {
-        launchNativeAction('flashlight_on');
-        const reply = langSelect.value.startsWith('ur') ? "فلیش لائٹ آن کر دی گئی ہے۔" : "Flashlight turned on.";
-        log(`> Nikya (Local): ${reply}`, 'text-emerald-300');
-        speak(reply);
-        return true;
-      }
-      if ((t.includes('flashlight') || t.includes('torch') || t.includes('لاٹ')) && (t.includes('off') || t.includes('band') || t.includes('bujhao') || t.includes('إيقاف'))) {
-        launchNativeAction('flashlight_off');
-        const reply = langSelect.value.startsWith('ur') ? "فلیش لائٹ بند کر دی گئی ہے۔" : "Flashlight turned off.";
-        log(`> Nikya (Local): ${reply}`, 'text-emerald-300');
-        speak(reply);
-        return true;
-      }
-      return false;
-    }
-
-    // Speech Recognition
+    // Speech Recognition Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -274,7 +223,7 @@
       };
 
       recognition.onerror = (e) => {
-        log(`> Speech Mic Error: ${e.error}`, 'text-red-400');
+        log(`> Mic Error: ${e.error}`, 'text-red-400');
         stopListening();
       };
 
@@ -299,17 +248,15 @@
 
     async function processUserPrompt(promptText) {
       log(`> User: ${promptText}`, 'text-white font-bold');
-      
-      if (processLocalCommands(promptText)) return;
 
       const apiKey = getApiKey();
       if (!apiKey) {
-        log('> [ERR]: Paste OpenRouter key (starts with sk-or-v1-)', 'text-yellow-400');
-        speak("Please enter your OpenRouter API key above.");
+        log('> [ERR]: No API key saved. Paste key & tap [SAVE].', 'text-yellow-400');
+        speak("Please save your API key first.");
         return;
       }
 
-      instructionText.textContent = 'PROCESSING OPENROUTER AI...';
+      instructionText.textContent = 'CONNECTING TO OPENROUTER...';
       const startTime = Date.now();
 
       try {
@@ -317,30 +264,30 @@
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Nikya Mobile Voice Assistant',
+            'HTTP-Referer': window.location.href,
+            'X-Title': 'Nikya Assistant',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'meta-llama/llama-3.3-70b-instruct:free',
+            model: 'google/gemini-2.0-flash-lite-001:free',
             messages: [
               {
                 role: 'system',
-                content: 'You are Nikya AI voice assistant. Respond in 1 short spoken sentence in the exact same language/dialect as the user prompt (Urdu, Roman Urdu, Arabic, English).'
+                content: 'You are Nikya AI voice assistant. Reply in 1 short sentence in the exact same language/dialect as the user (Urdu, Roman Urdu, Arabic, English).'
               },
               { role: 'user', content: promptText }
             ],
-            max_tokens: 100,
-            temperature: 0.6
+            max_tokens: 100
           })
         });
 
         const data = await response.json();
         latencyDisplay.textContent = `${Date.now() - startTime}ms`;
 
-        if (!response.ok || data.error) {
-          log(`> [OPENROUTER ERROR]: ${data.error?.message || 'Authentication error'}`, 'text-red-400');
-          speak("API authentication error.");
+        if (!response.ok) {
+          const errMsg = data.error?.message || `HTTP Status ${response.status}`;
+          log(`> [API ERROR ${response.status}]: ${errMsg}`, 'text-red-400 font-bold');
+          speak("API error encountered.");
           return;
         }
 
@@ -348,9 +295,11 @@
         if (aiReply) {
           log(`> Nikya: ${aiReply}`, 'text-emerald-300');
           speak(aiReply);
+        } else {
+          log('> [ERR]: Received empty reply from AI.', 'text-yellow-400');
         }
       } catch (err) {
-        log(`> Network Error: ${err.message}`, 'text-red-400');
+        log(`> [NET ERROR]: ${err.message}`, 'text-red-400');
       } finally {
         instructionText.textContent = 'SYSTEM READY // TAP CORE TO ENGAGE NIKYA';
       }
@@ -358,4 +307,3 @@
   </script>
 </body>
 </html>
-
