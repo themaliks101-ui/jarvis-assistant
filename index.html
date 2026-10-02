@@ -58,7 +58,7 @@
         <option value="en-US">English (US)</option>
         <option value="ar-SA">Arabic (العربية)</option>
       </select>
-      <input type="password" id="apiKeyInput" placeholder="> Paste OpenRouter Key" 
+      <input type="password" id="apiKeyInput" placeholder="> OpenRouter Key (sk-or-v1-...)" 
              class="flex-1 bg-zinc-950 border border-emerald-600/60 rounded px-2.5 py-1 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400 font-mono placeholder-emerald-800">
       <button id="saveKeyBtn" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-3 py-1 rounded transition-all active:scale-95 mono-font">
         [SAVE]
@@ -91,7 +91,7 @@
       <span class="text-[10px] text-emerald-600" id="latencyDisplay">0ms</span>
     </div>
     <div id="terminalLog" class="text-[11px] text-emerald-400 h-28 overflow-y-auto leading-relaxed space-y-1">
-      <p class="text-emerald-700">> root@nikya:~# Ready. Paste key and tap [SAVE].</p>
+      <p class="text-emerald-700">> root@nikya:~# OpenRouter engine active.</p>
     </div>
   </footer>
 
@@ -126,7 +126,7 @@
       if (activeKey) {
         apiKeyInput.value = activeKey;
         updateStatus('AI_ONLINE', 'emerald');
-        log('> [SYSTEM]: Key loaded from storage.', 'text-emerald-400');
+        log('> [SYSTEM]: Key loaded.', 'text-emerald-400');
       } else {
         updateStatus('NO_KEY', 'yellow');
         log('> [!] Paste key above & tap [SAVE].', 'text-yellow-400');
@@ -134,18 +134,16 @@
     });
 
     saveKeyBtn.addEventListener('click', () => {
-      const rawKey = apiKeyInput.value;
-      const cleanKey = sanitizeKey(rawKey);
-
+      const cleanKey = sanitizeKey(apiKeyInput.value);
       if (cleanKey.length > 10) {
         localStorage.setItem('OPENROUTER_API_KEY', cleanKey);
         apiKeyInput.value = cleanKey;
         updateStatus('AI_ONLINE', 'emerald');
-        log('> [OK]: Key sanitized & saved.', 'text-emerald-300');
+        log('> [OK]: OpenRouter key saved.', 'text-emerald-300');
         speak("Key saved.");
       } else {
-        log('> [WARN]: Invalid key length.', 'text-yellow-400');
-        speak("Key invalid.");
+        log('> [WARN]: Invalid key format.', 'text-yellow-400');
+        speak("Invalid key.");
       }
     });
 
@@ -195,7 +193,7 @@
       window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // Speech Recognition Setup
+    // Speech Recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -251,7 +249,7 @@
 
       const apiKey = getApiKey();
       if (!apiKey) {
-        log('> [ERR]: No API key saved. Paste key & tap [SAVE].', 'text-yellow-400');
+        log('> [ERR]: No OpenRouter key saved.', 'text-yellow-400');
         speak("Please save your API key first.");
         return;
       }
@@ -264,16 +262,16 @@
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': window.location.href,
+            'HTTP-Referer': window.location.origin,
             'X-Title': 'Nikya Assistant',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'google/gemini-2.0-flash-lite-001:free',
+            model: 'meta-llama/llama-3.3-70b-instruct:free',
             messages: [
               {
                 role: 'system',
-                content: 'You are Nikya AI voice assistant. Reply in 1 short sentence in the exact same language/dialect as the user (Urdu, Roman Urdu, Arabic, English).'
+                content: 'You are Nikya AI voice assistant. Reply in 1 short spoken sentence in the exact same language/dialect as the user prompt (Urdu, Roman Urdu, Arabic, English).'
               },
               { role: 'user', content: promptText }
             ],
@@ -285,9 +283,9 @@
         latencyDisplay.textContent = `${Date.now() - startTime}ms`;
 
         if (!response.ok) {
-          const errMsg = data.error?.message || `HTTP Status ${response.status}`;
+          const errMsg = data.error?.message || `HTTP ${response.status}`;
           log(`> [API ERROR ${response.status}]: ${errMsg}`, 'text-red-400 font-bold');
-          speak("API error encountered.");
+          speak("API error.");
           return;
         }
 
@@ -296,7 +294,7 @@
           log(`> Nikya: ${aiReply}`, 'text-emerald-300');
           speak(aiReply);
         } else {
-          log('> [ERR]: Received empty reply from AI.', 'text-yellow-400');
+          log('> [ERR]: Empty reply from AI.', 'text-yellow-400');
         }
       } catch (err) {
         log(`> [NET ERROR]: ${err.message}`, 'text-red-400');
