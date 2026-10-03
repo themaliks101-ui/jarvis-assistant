@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>NIKYA // OPENROUTER AI</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020604;color:#00ff66;font-family:monospace}
+body{padding:12px}.app{width:100%;max-width:520px;margin:auto;min-height:96vh;display:flex;flex-direction:column}
+.panel{border:1px solid #075c36;border-radius:14px;background:#030a06;padding:14px;box-shadow:0 0 18px #003d20}
+h1{font-size:14px;margin:0 0 12px;color:#00ff66;letter-spacing:2px}
+.row{display:flex;gap:8px;margin-top:8px}input,select,button{font:inherit}
+input,select{width:100%;background:#010302;color:#00ff66;border:1px solid #075c36;border-radius:8px;padding:11px;font-size:12px;outline:none}
+button{background:#020805;color:#00ff66;border:1px solid #075c36;border-radius:8px;padding:10px 12px;font-size:11px}
+.save{background:#00d95a;color:#001b0b;font-weight:bold;border:0}.danger{border-color:#6b1820;color:#ff6670}
+#status{float:right;font-size:9px;border:1px solid #6b5510;color:#ffd84d;padding:5px 7px;border-radius:6px}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#core{width:190px;height:190px;border-radius:50%;border:2px solid #00ff66;background:#030507;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px #00aa44,0 0 55px #003d20}
+#core:active{transform:scale(.94)}
+.inner{width:140px;height:140px;border-radius:50%;border:1px dashed #00aa55;display:flex;align-items:center;justify-content:center}
+.mic{font-size:35px}.ready{font-size:11px;letter-spacing:1px}
+.console{width:100%;border:1px solid #064d30;border-radius:10px;background:#010302;padding:10px}
+.log{height:120px;overflow:auto;color:#8affad;font-size:10px;line-height:1.5;white-space:pre-wrap}
+.small{font-size:9px;color:#16834a}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="panel">
+<h1>⌁ NIKYA_CORE // OPENROUTER <span id="status">NO_KEY</span></h1>
+<select id="lang">
+<option value="ur-PK">Urdu / Roman Urdu</option><option value="en-US">English</option><option value="ar-SA">Arabic</option>
+</select>
+<div class="row"><input id="key" type="password" placeholder="sk-or-v1-..."><button class="save" id="save">SAVE</button></div>
+<div class="row"><button id="show">SHOW / HIDE KEY</button><button class="danger" id="clear">CLEAR KEY</button></div>
+</section>
+
+<main>
+<button id="core"><div class="inner"><div class="mic">🎙</div></div></button>
+<div id="state" class="ready">TAP CORE TO SPEAK</div>
+<section class="console">
+<div class="row" style="margin:0 0 7px"><span class="small">NIKYA CONSOLE</span><button id="wipe" style="margin-left:auto;padding:4px 8px">CLEAR</button></div>
+<div id="log" class="log">[BOOT] NIKYA initialized.
+[INFO] Save your OpenRouter key, then tap the core.</div>
+</section>
+<div class="row" style="width:100%"><button id="test" style="flex:1">TEST AI</button><button id="stop" class="danger" style="flex:1">STOP VOICE</button></div>
+</main>
+<div class="small" style="text-align:center;padding:8px">NIKYA // PERSONAL VOICE ASSISTANT</div>
+</div>
+
+<script>
+const KEY="OPENROUTER_API_KEY", $=id=>document.getElementById(id);
+const key=$("key"),status=$("status"),logBox=$("log"),state=$("state"),core=$("core"),lang=$("lang");
+let rec=null,listening=false;
+function log(s){logBox.textContent+="\n"+s;logBox.scrollTop=logBox.scrollHeight}
+function refresh(){let k=localStorage.getItem(KEY)||"";status.textContent=k?"AI_ONLINE":"NO_KEY";status.style.color=k?"#00ff66":"#ffd84d";key.value=k}
+function speak(s){if(!speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(s);u.lang=lang.value;speechSynthesis.speak(u)}
+async function ask(text){
+ let k=localStorage.getItem(KEY);
+ if(!k){log("[ERROR] Save an OpenRouter key first.");state.textContent="SAVE API KEY FIRST";return}
+ state.textContent="THINKING...";log("[USER] "+text);
+ try{
+  let r=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+k,"Content-Type":"application/json","HTTP-Referer":location.href,"X-Title":"NIKYA Mobile Voice Assistant"},body:JSON.stringify({model:"openrouter/free",messages:[{role:"system",content:"You are NIKYA, a concise helpful mobile voice assistant. If the user speaks Roman Urdu, answer in Roman Urdu."},{role:"user",content:text}],max_tokens:400})});
+  let d=await r.json();if(!r.ok)throw Error(d?.error?.message||"HTTP "+r.status);
+  let a=d?.choices?.[0]?.message?.content?.trim();if(!a)throw Error("Empty AI response");
+  log("[NIKYA] "+a);state.textContent="READY";speak(a)
+ }catch(e){log("[ERROR] "+e.message);state.textContent="AI ERROR"}
+}
+function setup(){
+ let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){log("[ERROR] Speech recognition is not supported.");return}
+ rec=new SR();rec.lang=lang.value;rec.continuous=false;rec.interimResults=false;
+ rec.onstart=()=>{listening=true;state.textContent="LISTENING...";log("[VOICE] Listening...")};
+ rec.onresult=e=>{let t=e.results[0][0].transcript.trim();log("[HEARD] "+t);if(/^(stop|stop voice|stop speaking)$/i.test(t)){speechSynthesis.cancel();return}ask(t)};
+ rec.onerror=e=>{log("[ERROR] Mic: "+e.error);state.textContent="VOICE ERROR"};
+ rec.onend=()=>{listening=false;if(state.textContent==="LISTENING...")state.textContent="TAP CORE TO SPEAK"}
+}
+$("save").onclick=()=>{let v=key.value.trim();if(!v){log("[ERROR] Enter your API key.");return}localStorage.setItem(KEY,v);refresh();log("[OK] OpenRouter key saved locally.")};
+$("show").onclick=()=>{key.type=key.type==="password"?"text":"password"};
+$("clear").onclick=()=>{localStorage.removeItem(KEY);refresh();log("[OK] Key cleared.")};
+$("wipe").onclick=()=>logBox.textContent="[BOOT] Console cleared.";
+$("test").onclick=()=>ask("Say hello and confirm that NIKYA is online.");
+$("stop").onclick=()=>{rec?.stop();speechSynthesis?.cancel();state.textContent="READY";log("[CMD] Voice stopped.")};
+lang.onchange=()=>{if(rec)rec.lang=lang.value};
+core.onclick=()=>{if(!rec)setup();if(!rec)return;if(listening)rec.stop();else{rec.lang=lang.value;try{rec.start()}catch(e){log("[ERROR] "+e.message)}}};
+refresh();setup();
+</script>
+</body>
+</html>
