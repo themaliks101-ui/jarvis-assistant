@@ -1,384 +1,89 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#030804">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>NIKYA // OPENROUTER AI</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-  <style>
-    * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
-      margin: 0;
-      background: #030804;
-      color: #00ff66;
-      font-family: "Fira Code", monospace;
-      touch-action: manipulation;
-    }
-    button, input, select { font: inherit; }
-    .mono { font-family: "Share Tech Mono", monospace; }
-    .glow {
-      box-shadow: 0 0 15px rgba(0,255,102,.35), 0 0 35px rgba(0,255,102,.15);
-    }
-    .text-glow { text-shadow: 0 0 10px rgba(0,255,102,.8); }
-    .core-active { animation: pulseCore 1.2s infinite ease-in-out; }
-    @keyframes pulseCore {
-      0% { transform: scale(.96); box-shadow: 0 0 15px rgba(0,255,102,.35); }
-      50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,255,102,.8), 0 0 70px rgba(0,255,102,.25); }
-      100% { transform: scale(.96); box-shadow: 0 0 15px rgba(0,255,102,.35); }
-    }
-    .scrollbar::-webkit-scrollbar { width: 4px; }
-    .scrollbar::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>NIKYA // OPENROUTER AI</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020604;color:#00ff66;font-family:monospace}
+body{padding:12px}.app{width:100%;max-width:520px;margin:auto;min-height:96vh;display:flex;flex-direction:column}
+.panel{border:1px solid #075c36;border-radius:14px;background:#030a06;padding:14px;box-shadow:0 0 18px #003d20}
+h1{font-size:14px;margin:0 0 12px;color:#00ff66;letter-spacing:2px}
+.row{display:flex;gap:8px;margin-top:8px}input,select,button{font:inherit}
+input,select{width:100%;background:#010302;color:#00ff66;border:1px solid #075c36;border-radius:8px;padding:11px;font-size:12px;outline:none}
+button{background:#020805;color:#00ff66;border:1px solid #075c36;border-radius:8px;padding:10px 12px;font-size:11px}
+.save{background:#00d95a;color:#001b0b;font-weight:bold;border:0}.danger{border-color:#6b1820;color:#ff6670}
+#status{float:right;font-size:9px;border:1px solid #6b5510;color:#ffd84d;padding:5px 7px;border-radius:6px}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#core{width:190px;height:190px;border-radius:50%;border:2px solid #00ff66;background:#030507;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px #00aa44,0 0 55px #003d20}
+#core:active{transform:scale(.94)}
+.inner{width:140px;height:140px;border-radius:50%;border:1px dashed #00aa55;display:flex;align-items:center;justify-content:center}
+.mic{font-size:35px}.ready{font-size:11px;letter-spacing:1px}
+.console{width:100%;border:1px solid #064d30;border-radius:10px;background:#010302;padding:10px}
+.log{height:120px;overflow:auto;color:#8affad;font-size:10px;line-height:1.5;white-space:pre-wrap}
+.small{font-size:9px;color:#16834a}
+</style>
 </head>
-
 <body>
-  <div class="min-h-screen max-w-md mx-auto p-3 flex flex-col gap-3">
+<div class="app">
+<section class="panel">
+<h1>⌁ NIKYA_CORE // OPENROUTER <span id="status">NO_KEY</span></h1>
+<select id="lang">
+<option value="ur-PK">Urdu / Roman Urdu</option><option value="en-US">English</option><option value="ar-SA">Arabic</option>
+</select>
+<div class="row"><input id="key" type="password" placeholder="sk-or-v1-..."><button class="save" id="save">SAVE</button></div>
+<div class="row"><button id="show">SHOW / HIDE KEY</button><button class="danger" id="clear">CLEAR KEY</button></div>
+</section>
 
-    <header class="bg-black/90 border border-emerald-500/40 rounded-xl p-3 shadow-lg">
-      <div class="flex items-center justify-between gap-2">
-        <div class="mono text-emerald-400 font-bold text-sm tracking-widest text-glow">
-          <i class="fa-solid fa-terminal mr-1"></i>NIKYA_CORE // OPENROUTER
-        </div>
-        <div id="statusBadge"
-             class="shrink-0 text-[10px] px-2 py-1 rounded border border-yellow-500/50 bg-yellow-950/30 text-yellow-400">
-          NO_KEY
-        </div>
-      </div>
-
-      <div class="mt-3">
-        <select id="langSelect"
-          class="w-full bg-zinc-950 border border-emerald-600/60 rounded-lg px-3 py-2 text-xs text-emerald-300 outline-none">
-          <option value="ur-PK">Urdu / Roman Urdu</option>
-          <option value="en-US">English</option>
-          <option value="ar-SA">Arabic</option>
-        </select>
-      </div>
-
-      <div class="mt-2 flex gap-2">
-        <input id="apiKeyInput" type="password" autocomplete="off" spellcheck="false"
-          placeholder="sk-or-v1-..."
-          class="flex-1 min-w-0 bg-zinc-950 border border-emerald-600/60 rounded-lg px-3 py-2 text-xs text-emerald-300 outline-none focus:border-emerald-300">
-        <button id="saveKeyBtn" type="button"
-          class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-4 rounded-lg active:scale-95">
-          SAVE
-        </button>
-      </div>
-
-      <div class="flex gap-2 mt-2">
-        <button id="showKeyBtn" type="button"
-          class="flex-1 border border-emerald-800 rounded-lg py-1.5 text-[10px] text-emerald-500">
-          SHOW / HIDE KEY
-        </button>
-        <button id="clearKeyBtn" type="button"
-          class="flex-1 border border-red-900 rounded-lg py-1.5 text-[10px] text-red-400">
-          CLEAR KEY
-        </button>
-      </div>
-    </header>
-
-    <main class="flex-1 flex flex-col items-center justify-center py-3 gap-4">
-      <button id="arcReactor" type="button"
-        aria-label="Start voice assistant"
-        class="w-44 h-44 rounded-full border-2 border-emerald-500/70 bg-zinc-950 flex items-center justify-center glow transition-all active:scale-90">
-        <div class="w-32 h-32 rounded-full border border-dashed border-emerald-400/60 flex items-center justify-center">
-          <div class="w-20 h-20 rounded-full border-2 border-emerald-400 flex items-center justify-center">
-            <i id="micIcon" class="fa-solid fa-microphone text-2xl text-emerald-400"></i>
-          </div>
-        </div>
-      </button>
-
-      <div id="stateText" class="mono text-xs text-emerald-400 text-glow">TAP CORE TO SPEAK</div>
-
-      <div class="w-full bg-black/70 border border-emerald-900/70 rounded-xl p-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="mono text-[10px] text-emerald-500">NIKYA CONSOLE</span>
-          <button id="clearConsoleBtn" type="button" class="text-[10px] text-red-400">CLEAR</button>
-        </div>
-        <div id="console"
-          class="scrollbar h-32 overflow-y-auto rounded-lg bg-zinc-950/80 border border-emerald-950 p-2 text-[10px] leading-4 text-emerald-300 whitespace-pre-wrap">
-[BOOT] NIKYA initialized.
-[INFO] Save an OpenRouter key, then tap the core.
-        </div>
-      </div>
-
-      <div class="w-full flex gap-2">
-        <button id="testBtn" type="button"
-          class="flex-1 border border-emerald-700 rounded-lg py-2 text-xs text-emerald-400">
-          TEST AI
-        </button>
-        <button id="stopBtn" type="button"
-          class="flex-1 border border-red-900 rounded-lg py-2 text-xs text-red-400">
-          STOP VOICE
-        </button>
-      </div>
-    </main>
-
-    <footer class="text-center text-[9px] text-emerald-900 py-1">
-      NIKYA // PERSONAL VOICE INTERFACE
-    </footer>
-  </div>
+<main>
+<button id="core"><div class="inner"><div class="mic">🎙</div></div></button>
+<div id="state" class="ready">TAP CORE TO SPEAK</div>
+<section class="console">
+<div class="row" style="margin:0 0 7px"><span class="small">NIKYA CONSOLE</span><button id="wipe" style="margin-left:auto;padding:4px 8px">CLEAR</button></div>
+<div id="log" class="log">[BOOT] NIKYA initialized.
+[INFO] Save your OpenRouter key, then tap the core.</div>
+</section>
+<div class="row" style="width:100%"><button id="test" style="flex:1">TEST AI</button><button id="stop" class="danger" style="flex:1">STOP VOICE</button></div>
+</main>
+<div class="small" style="text-align:center;padding:8px">NIKYA // PERSONAL VOICE ASSISTANT</div>
+</div>
 
 <script>
-(() => {
-  "use strict";
-
-  const KEY_NAME = "OPENROUTER_API_KEY";
-  const MODEL = "openrouter/free";
-
-  const $ = id => document.getElementById(id);
-  const keyInput = $("apiKeyInput");
-  const saveBtn = $("saveKeyBtn");
-  const showBtn = $("showKeyBtn");
-  const clearBtn = $("clearKeyBtn");
-  const status = $("statusBadge");
-  const core = $("arcReactor");
-  const micIcon = $("micIcon");
-  const stateText = $("stateText");
-  const consoleBox = $("console");
-  const langSelect = $("langSelect");
-  const testBtn = $("testBtn");
-  const stopBtn = $("stopBtn");
-  const clearConsoleBtn = $("clearConsoleBtn");
-
-  let recognition = null;
-  let listening = false;
-  let speaking = false;
-
-  function log(msg, type = "INFO") {
-    const line = `[${type}] ${msg}`;
-    consoleBox.textContent += (consoleBox.textContent.trim() ? "\n" : "") + line;
-    consoleBox.scrollTop = consoleBox.scrollHeight;
-  }
-
-  function getKey() {
-    return localStorage.getItem(KEY_NAME) || "";
-  }
-
-  function updateStatus() {
-    const exists = !!getKey();
-    status.textContent = exists ? "AI_ONLINE" : "NO_KEY";
-    status.className = exists
-      ? "shrink-0 text-[10px] px-2 py-1 rounded border border-emerald-500/50 bg-emerald-950/30 text-emerald-400"
-      : "shrink-0 text-[10px] px-2 py-1 rounded border border-yellow-500/50 bg-yellow-950/30 text-yellow-400";
-  }
-
-  function speak(text) {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = langSelect.value;
-    u.rate = 1.0;
-    u.pitch = 1.0;
-    u.onstart = () => { speaking = true; };
-    u.onend = () => { speaking = false; };
-    window.speechSynthesis.speak(u);
-  }
-
-  async function askAI(userText) {
-    const apiKey = getKey();
-    if (!apiKey) {
-      log("No OpenRouter API key saved.", "ERROR");
-      stateText.textContent = "SAVE API KEY FIRST";
-      return;
-    }
-
-    log(`USER: ${userText}`, "VOICE");
-    stateText.textContent = "THINKING...";
-    core.classList.add("core-active");
-
-    try {
-      const systemPrompt = `You are NIKYA, a concise mobile voice assistant.
-Reply naturally and briefly unless the user asks for detail.
-The user's selected language is ${langSelect.value}.
-If the user uses Roman Urdu, answer in Roman Urdu.`;
-
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + apiKey,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.href,
-          "X-Title": "NIKYA Mobile Voice Assistant"
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userText }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const detail = data?.error?.message || `HTTP ${response.status}`;
-        throw new Error(detail);
-      }
-
-      const answer = data?.choices?.[0]?.message?.content?.trim();
-      if (!answer) throw new Error("Empty AI response.");
-
-      log(`NIKYA: ${answer}`, "AI");
-      stateText.textContent = "READY";
-      speak(answer);
-    } catch (err) {
-      log(err.message || String(err), "ERROR");
-      stateText.textContent = "AI ERROR";
-    } finally {
-      core.classList.remove("core-active");
-    }
-  }
-
-  function handleLocalCommand(text) {
-    const t = text.toLowerCase().trim();
-
-    if (t === "stop" || t === "stop speaking" || t.includes("stop voice")) {
-      window.speechSynthesis?.cancel();
-      log("Voice stopped.", "CMD");
-      stateText.textContent = "READY";
-      return true;
-    }
-
-    if (t.includes("hello") || t.includes("salam") || t.includes("assalam")) {
-      const reply = langSelect.value === "en-US"
-        ? "Hello. NIKYA is ready."
-        : "Wa Alaikum Assalam. NIKYA ready hai.";
-      log(`NIKYA: ${reply}`, "AI");
-      speak(reply);
-      return true;
-    }
-
-    return false;
-  }
-
-  function setupRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SR) {
-      log("Speech recognition is not supported by this browser.", "ERROR");
-      stateText.textContent = "VOICE NOT SUPPORTED";
-      return;
-    }
-
-    recognition = new SR();
-    recognition.lang = langSelect.value;
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      listening = true;
-      core.classList.add("core-active");
-      micIcon.className = "fa-solid fa-microphone-lines text-2xl text-emerald-300";
-      stateText.textContent = "LISTENING...";
-      log("Listening...", "VOICE");
-    };
-
-    recognition.onresult = event => {
-      const text = event.results?.[0]?.[0]?.transcript?.trim();
-      if (!text) return;
-      if (!handleLocalCommand(text)) askAI(text);
-    };
-
-    recognition.onerror = event => {
-      log(`Speech recognition: ${event.error}`, "ERROR");
-      stateText.textContent = "VOICE ERROR";
-    };
-
-    recognition.onend = () => {
-      listening = false;
-      core.classList.remove("core-active");
-      micIcon.className = "fa-solid fa-microphone text-2xl text-emerald-400";
-      if (stateText.textContent === "LISTENING...") stateText.textContent = "TAP CORE TO SPEAK";
-    };
-  }
-
-  saveBtn.addEventListener("click", () => {
-    const value = keyInput.value.trim();
-    if (!value) {
-      log("Enter an OpenRouter API key first.", "ERROR");
-      return;
-    }
-    if (!value.startsWith("sk-or-v1-")) {
-      log("The key does not look like an OpenRouter key.", "WARN");
-    }
-    localStorage.setItem(KEY_NAME, value);
-    keyInput.value = value;
-    updateStatus();
-    log("OpenRouter key saved locally in this browser.", "OK");
-  });
-
-  showBtn.addEventListener("click", () => {
-    const hidden = keyInput.type === "password";
-    keyInput.type = hidden ? "text" : "password";
-    showBtn.textContent = hidden ? "HIDE KEY" : "SHOW / HIDE KEY";
-  });
-
-  clearBtn.addEventListener("click", () => {
-    localStorage.removeItem(KEY_NAME);
-    keyInput.value = "";
-    updateStatus();
-    log("OpenRouter key cleared.", "OK");
-  });
-
-  clearConsoleBtn.addEventListener("click", () => {
-    consoleBox.textContent = "[BOOT] Console cleared.";
-  });
-
-  core.addEventListener("click", () => {
-    if (!recognition) setupRecognition();
-    if (!recognition) return;
-
-    if (listening) {
-      recognition.stop();
-      return;
-    }
-
-    recognition.lang = langSelect.value;
-    try {
-      recognition.start();
-    } catch (e) {
-      log("Could not start microphone: " + e.message, "ERROR");
-    }
-  });
-
-  testBtn.addEventListener("click", () => askAI("Say hello and confirm that NIKYA is online."));
-  stopBtn.addEventListener("click", () => {
-    recognition?.stop();
-    window.speechSynthesis?.cancel();
-    core.classList.remove("core-active");
-    stateText.textContent = "READY";
-    log("Voice output stopped.", "CMD");
-  });
-
-  langSelect.addEventListener("change", () => {
-    if (recognition) recognition.lang = langSelect.value;
-    log("Language changed to " + langSelect.options[langSelect.selectedIndex].text + ".", "OK");
-  });
-
-  const saved = getKey();
-  if (saved) keyInput.value = saved;
-  updateStatus();
-  setupRecognition();
-})();
+const KEY="OPENROUTER_API_KEY", $=id=>document.getElementById(id);
+const key=$("key"),status=$("status"),logBox=$("log"),state=$("state"),core=$("core"),lang=$("lang");
+let rec=null,listening=false;
+function log(s){logBox.textContent+="\n"+s;logBox.scrollTop=logBox.scrollHeight}
+function refresh(){let k=localStorage.getItem(KEY)||"";status.textContent=k?"AI_ONLINE":"NO_KEY";status.style.color=k?"#00ff66":"#ffd84d";key.value=k}
+function speak(s){if(!speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(s);u.lang=lang.value;speechSynthesis.speak(u)}
+async function ask(text){
+ let k=localStorage.getItem(KEY);
+ if(!k){log("[ERROR] Save an OpenRouter key first.");state.textContent="SAVE API KEY FIRST";return}
+ state.textContent="THINKING...";log("[USER] "+text);
+ try{
+  let r=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+k,"Content-Type":"application/json","HTTP-Referer":location.href,"X-Title":"NIKYA Mobile Voice Assistant"},body:JSON.stringify({model:"openrouter/free",messages:[{role:"system",content:"You are NIKYA, a concise helpful mobile voice assistant. If the user speaks Roman Urdu, answer in Roman Urdu."},{role:"user",content:text}],max_tokens:400})});
+  let d=await r.json();if(!r.ok)throw Error(d?.error?.message||"HTTP "+r.status);
+  let a=d?.choices?.[0]?.message?.content?.trim();if(!a)throw Error("Empty AI response");
+  log("[NIKYA] "+a);state.textContent="READY";speak(a)
+ }catch(e){log("[ERROR] "+e.message);state.textContent="AI ERROR"}
+}
+function setup(){
+ let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){log("[ERROR] Speech recognition is not supported.");return}
+ rec=new SR();rec.lang=lang.value;rec.continuous=false;rec.interimResults=false;
+ rec.onstart=()=>{listening=true;state.textContent="LISTENING...";log("[VOICE] Listening...")};
+ rec.onresult=e=>{let t=e.results[0][0].transcript.trim();log("[HEARD] "+t);if(/^(stop|stop voice|stop speaking)$/i.test(t)){speechSynthesis.cancel();return}ask(t)};
+ rec.onerror=e=>{log("[ERROR] Mic: "+e.error);state.textContent="VOICE ERROR"};
+ rec.onend=()=>{listening=false;if(state.textContent==="LISTENING...")state.textContent="TAP CORE TO SPEAK"}
+}
+$("save").onclick=()=>{let v=key.value.trim();if(!v){log("[ERROR] Enter your API key.");return}localStorage.setItem(KEY,v);refresh();log("[OK] OpenRouter key saved locally.")};
+$("show").onclick=()=>{key.type=key.type==="password"?"text":"password"};
+$("clear").onclick=()=>{localStorage.removeItem(KEY);refresh();log("[OK] Key cleared.")};
+$("wipe").onclick=()=>logBox.textContent="[BOOT] Console cleared.";
+$("test").onclick=()=>ask("Say hello and confirm that NIKYA is online.");
+$("stop").onclick=()=>{rec?.stop();speechSynthesis?.cancel();state.textContent="READY";log("[CMD] Voice stopped.")};
+lang.onchange=()=>{if(rec)rec.lang=lang.value};
+core.onclick=()=>{if(!rec)setup();if(!rec)return;if(listening)rec.stop();else{rec.lang=lang.value;try{rec.start()}catch(e){log("[ERROR] "+e.message)}}};
+refresh();setup();
 </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/index.html")
-path.write_text(html, encoding="utf-8")
-print(f"Created fixed NIKYA index.html: {path}")
